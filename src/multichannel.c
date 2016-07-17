@@ -48,9 +48,10 @@ multichannel_open(struct channel_conf *conf, int len)
 	return m;
 }
 
-int multichannel_send(struct multichannel *c, const struct nethdr *net)
+int multichannel_send(struct multichannel *m, const struct nethdr *net)
 {
 	int ret = 0;
+	int i;
 	for (i = 0; i < m->channel_num; i++) {
 		ret = channel_send(m->channel[i], net);
 	}
