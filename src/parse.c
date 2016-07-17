@@ -190,16 +190,20 @@ static struct ct_parser h[NTA_MAX] = {
 		.attr	= ATTR_CONNLABELS,
 		.max_size = NTA_SIZE(NTA_LABELS_MAX_SIZE),
 	},
+#ifdef ATTR_SNAT_IPV6
 	[NTA_SNAT_IPV6]	= {
 		.parse	= ct_parse_u128,
 		.attr	= ATTR_SNAT_IPV6,
 		.size	= NTA_SIZE(sizeof(uint32_t) * 4),
 	},
+#endif
+#ifdef ATTR_DNAT_IPV6
 	[NTA_DNAT_IPV6] = {
 		.parse	= ct_parse_u128,
 		.attr	= ATTR_DNAT_IPV6,
 		.size	= NTA_SIZE(sizeof(uint32_t) * 4),
 	},
+#endif
 };
 
 static void
