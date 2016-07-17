@@ -58,9 +58,14 @@ int multichannel_send(struct multichannel *m, const struct nethdr *net)
 	return ret;
 }
 
-int multichannel_send_flush(struct multichannel *c)
+int multichannel_send_flush(struct multichannel *m)
 {
-	return channel_send_flush(c->current);
+	int ret = 0;
+	int i;
+	for (i = 0; i < m->channel_num; i++) {
+		ret = channel_send_flush(m->channel[i]);
+	}
+	return ret;
 }
 
 int multichannel_recv(struct multichannel *c, char *buf, int size)
