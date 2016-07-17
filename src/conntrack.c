@@ -472,8 +472,8 @@ static const int opt2attr[] = {
 	['l']	= ATTR_CONNLABELS,
 	['<']	= ATTR_CONNLABELS,
 	['>']	= ATTR_CONNLABELS,
-	['(']	= ATTR_ORIG_ZONE,
-	[')']	= ATTR_REPL_ZONE,
+//	['(']	= ATTR_ORIG_ZONE,
+//	[')']	= ATTR_REPL_ZONE,
 };
 
 enum ct_direction {
