@@ -125,42 +125,42 @@ do_channel_handler_step(struct channel *c, struct nethdr *net, size_t remain)
 		if (ct == NULL)
 			return;
 		STATE_SYNC(external)->ct.new(ct);
-		handle_relay_ct(c, net);
+		handle_relay(c, net);
 		break;
 	case NET_T_STATE_CT_UPD:
 		ct = msg2ct_alloc(net, remain);
 		if (ct == NULL)
 			return;
 		STATE_SYNC(external)->ct.upd(ct);
-		handle_relay_ct(c, net);
+		handle_relay(c, net);
 		break;
 	case NET_T_STATE_CT_DEL:
 		ct = msg2ct_alloc(net, remain);
 		if (ct == NULL)
 			return;
 		STATE_SYNC(external)->ct.del(ct);
-		handle_relay_ct(c, net);
+		handle_relay(c, net);
 		break;
 	case NET_T_STATE_EXP_NEW:
 		exp = msg2exp_alloc(net, remain);
 		if (exp == NULL)
 			return;
 		STATE_SYNC(external)->exp.new(exp);
-		handle_relay_ct(c, net);
+		handle_relay(c, net);
 		break;
 	case NET_T_STATE_EXP_UPD:
 		exp = msg2exp_alloc(net, remain);
 		if (exp == NULL)
 			return;
 		STATE_SYNC(external)->exp.upd(exp);
-		handle_relay_ct(c, net);
+		handle_relay(c, net);
 		break;
 	case NET_T_STATE_EXP_DEL:
 		exp = msg2exp_alloc(net, remain);
 		if (exp == NULL)
 			return;
 		STATE_SYNC(external)->exp.del(exp);
-		handle_relay_ct(c, net);
+		handle_relay(c, net);
 		break;
 	default:
 		STATE_SYNC(error).msg_rcv_malformed++;
