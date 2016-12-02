@@ -99,6 +99,7 @@ channel_open(struct channel_conf *cfg)
 		return NULL;
 
 	c->channel_type = cfg->channel_type;
+	c->channel_relay_mode = cfg->channel_relay_mode;
 
 	fd = socket(AF_INET, SOCK_DGRAM, 0);
 	if (fd == -1) {

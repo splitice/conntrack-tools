@@ -49,6 +49,7 @@ struct channel_conf {
 	char				channel_ifname[IFNAMSIZ];
 	unsigned int			channel_flags;
 	union channel_type_conf		u;
+	int              channel_relay_mode;
 };
 
 struct nlif_handle;
@@ -76,6 +77,7 @@ struct channel_buffer;
 
 struct channel {
 	int			channel_type;
+	int         channel_relay_mode;
 	int			channel_ifindex;
 	int			channel_ifmtu;
 	unsigned int		channel_flags;
@@ -115,6 +117,7 @@ struct multichannel {
 struct multichannel *multichannel_open(struct channel_conf *conf, int len);
 void multichannel_close(struct multichannel *m);
 
+int multichannel_send_allbut(struct multichannel *m, const struct nethdr *net, struct channel* ex);
 int multichannel_send(struct multichannel *c, const struct nethdr *net);
 int multichannel_send_flush(struct multichannel *c);
 int multichannel_recv(struct multichannel *c, char *buf, int size);
