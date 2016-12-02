@@ -76,12 +76,14 @@ static struct nf_expect *msg2exp_alloc(struct nethdr *net, size_t remain)
 	}
 	return exp;
 }
+
 static void
 handle_relay(struct channel *c, struct nethdr *net){
-	if(!c->relay_mode) return;
+	if(!c->channel_relay_mode) return;
 	
 	multichannel_send_allbut(STATE_SYNC(channel), net, c);
 }
+
 static void
 do_channel_handler_step(struct channel *c, struct nethdr *net, size_t remain)
 {
