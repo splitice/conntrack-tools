@@ -54,7 +54,7 @@ int multichannel_send_allbut(struct multichannel *m, const struct nethdr *net, s
 	int i;
 	for (i = 0; i < m->channel_num; i++) {
 		if(m->channel[i] != ex)
-			ret = channel_send(m->channel[i], net);
+			ret |= channel_send(m->channel[i], net);
 	}
 	return ret;
 }
@@ -64,7 +64,7 @@ int multichannel_send(struct multichannel *m, const struct nethdr *net)
 	int ret = 0;
 	int i;
 	for (i = 0; i < m->channel_num; i++) {
-		ret = channel_send(m->channel[i], net);
+		ret |= channel_send(m->channel[i], net);
 	}
 	return ret;
 }
@@ -74,7 +74,7 @@ int multichannel_send_flush(struct multichannel *m)
 	int ret = 0;
 	int i;
 	for (i = 0; i < m->channel_num; i++) {
-		ret = channel_send_flush(m->channel[i]);
+		ret |= channel_send_flush(m->channel[i]);
 	}
 	return ret;
 }
