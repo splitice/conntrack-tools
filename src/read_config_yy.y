@@ -596,13 +596,13 @@ udp_option: T_CHECKSUM T_OFF
 udp_option: T_RELAYMODE T_ON 
 {
 	__max_dedicated_links_reached();
-	conf.channel[conf.channel_num].channel_relay_mode = 0;
+	conf.channel[conf.channel_num].channel_relay_mode = 1;
 };
 
 udp_option: T_RELAYMODE T_OFF
 {
 	__max_dedicated_links_reached();
-	conf.channel[conf.channel_num].channel_relay_mode = 1;
+	conf.channel[conf.channel_num].channel_relay_mode = 0;
 };
 
 tcp_line : T_TCP '{' tcp_options '}'
@@ -734,13 +734,13 @@ tcp_option: T_RCVBUFF T_NUMBER
 tcp_option: T_RELAYMODE T_ON 
 {
 	__max_dedicated_links_reached();
-	conf.channel[conf.channel_num].channel_relay_mode = 0;
+	conf.channel[conf.channel_num].channel_relay_mode = 1;
 };
 
 tcp_option: T_RELAYMODE T_OFF
 {
 	__max_dedicated_links_reached();
-	conf.channel[conf.channel_num].channel_relay_mode = 1;
+	conf.channel[conf.channel_num].channel_relay_mode = 0;
 };
 
 tcp_option: T_CHECKSUM T_ON 
