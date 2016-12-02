@@ -99,6 +99,7 @@ channel_open(struct channel_conf *cfg)
 		return NULL;
 
 	c->channel_type = cfg->channel_type;
+	c->channel_relay_mode = cfg->channel_relay_mode;
 
 	fd = socket(AF_INET, SOCK_DGRAM, 0);
 	if (fd == -1) {
@@ -228,16 +229,22 @@ int channel_send(struct channel *c, const struct nethdr *net)
 		c->ops->send(c->data, net, len);
 		return 1;
 	}
+	
 retry:
 	if (c->buffer->len + len < c->buffer->size) {
 		memcpy(c->buffer->data + c->buffer->len, net, len);
 		c->buffer->len += len;
+	} else if(len > c->buffer->size){
+		/* Sending a packet longer than the buffering length
+		 * should not ever happen, but it might. */
+		channel_send_flush(c);
+		c->ops->send(c->data, net, len);
 	} else {
 		/* We've got pending packets to deliver, enqueue this
 		 * packet to avoid possible re-ordering. */
 		if (pending_errors) {
 			channel_enqueue_errors(c);
-		} else {
+		} else {	
 			ret = c->ops->send(c->data, c->buffer->data,
 					   c->buffer->len);
 			if (ret == -1 &&

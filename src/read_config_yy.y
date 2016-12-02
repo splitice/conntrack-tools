@@ -89,7 +89,7 @@ enum {
 %token T_OPTIONS T_TCP_WINDOW_TRACKING T_EXPECT_SYNC
 %token T_HELPER T_HELPER_QUEUE_NUM T_HELPER_QUEUE_LEN T_HELPER_POLICY
 %token T_HELPER_EXPECT_TIMEOUT T_HELPER_EXPECT_MAX
-%token T_SYSTEMD
+%token T_SYSTEMD T_RELAYMODE
 
 %token <string> T_IP T_PATH_VAL
 %token <val> T_NUMBER
@@ -489,6 +489,7 @@ udp_line : T_UDP T_DEFAULT '{' udp_options '}'
 
 udp_options :
 	    | udp_options udp_option;
+		
 
 udp_option : T_IPV4_ADDR T_IP
 {
@@ -589,6 +590,19 @@ udp_option: T_CHECKSUM T_OFF
 {
 	__max_dedicated_links_reached();
 	conf.channel[conf.channel_num].u.udp.checksum = 1;
+};
+
+
+udp_option: T_RELAYMODE T_ON 
+{
+	__max_dedicated_links_reached();
+	conf.channel[conf.channel_num].channel_relay_mode = 1;
+};
+
+udp_option: T_RELAYMODE T_OFF
+{
+	__max_dedicated_links_reached();
+	conf.channel[conf.channel_num].channel_relay_mode = 0;
 };
 
 tcp_line : T_TCP '{' tcp_options '}'
@@ -715,6 +729,18 @@ tcp_option: T_RCVBUFF T_NUMBER
 {
 	__max_dedicated_links_reached();
 	conf.channel[conf.channel_num].u.tcp.rcvbuf = $2;
+};
+
+tcp_option: T_RELAYMODE T_ON 
+{
+	__max_dedicated_links_reached();
+	conf.channel[conf.channel_num].channel_relay_mode = 1;
+};
+
+tcp_option: T_RELAYMODE T_OFF
+{
+	__max_dedicated_links_reached();
+	conf.channel[conf.channel_num].channel_relay_mode = 0;
 };
 
 tcp_option: T_CHECKSUM T_ON 

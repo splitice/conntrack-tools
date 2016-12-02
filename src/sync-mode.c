@@ -78,6 +78,13 @@ static struct nf_expect *msg2exp_alloc(struct nethdr *net, size_t remain)
 }
 
 static void
+handle_relay(struct channel *c, struct nethdr *net){
+	if(!c->channel_relay_mode) return;
+	
+	multichannel_send_allbut(STATE_SYNC(channel), net, c);
+}
+
+static void
 do_channel_handler_step(struct channel *c, struct nethdr *net, size_t remain)
 {
 	struct nf_conntrack *ct = NULL;
@@ -86,9 +93,25 @@ do_channel_handler_step(struct channel *c, struct nethdr *net, size_t remain)
 	if (net->version != CONNTRACKD_PROTOCOL_VERSION) {
 		STATE_SYNC(error).msg_rcv_malformed++;
 		STATE_SYNC(error).msg_rcv_bad_version++;
+		net->len = ntohs(net->len);
 		return;
 	}
-
+	
+	if(IS_DATA(net) && !IS_ACK(net) && !IS_NACK(net) && !IS_RESYNC(net) && !IS_ALIVE(net)){
+		// Relay to all
+		switch(net->type) {
+		case NET_T_STATE_CT_NEW:
+		case NET_T_STATE_CT_UPD:
+		case NET_T_STATE_CT_DEL:
+		case NET_T_STATE_EXP_NEW:
+		case NET_T_STATE_EXP_UPD:
+		case NET_T_STATE_EXP_DEL:
+			handle_relay(c, net);
+		}
+	}
+	
+	HDR_NETWORK2HOST(net);
+	
 	switch (STATE_SYNC(sync)->recv(net)) {
 	case MSG_DATA:
 		multichannel_change_current_channel(STATE_SYNC(channel), c);
@@ -239,8 +262,6 @@ static int channel_handler_routine(struct channel *m)
 				break;
 			}
 		}
-
-		HDR_NETWORK2HOST(net);
 
 		do_channel_handler_step(m, net, remain);
 		ptr += net->len;
