@@ -254,6 +254,9 @@ static int notrack_init(void)
 {
 	init_alarm(&alive_alarm, NULL, do_alive_alarm);
 	add_alarm(&alive_alarm, ALIVE_INT, 0);
+	
+	tx_queue_add_ctlmsg(NET_F_RESYNC, 0, 0);
+	
 	return 0;
 }
 
