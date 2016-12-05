@@ -27,6 +27,7 @@
 
 #include <string.h>
 
+static struct alarm_block f_alive_alarm;
 static struct alarm_block alive_alarm;
 
 /* XXX: alive message expiration configurable */
@@ -250,12 +251,20 @@ static void do_alive_alarm(struct alarm_block *a, void *data)
 	add_alarm(&alive_alarm, ALIVE_INT, 0);
 }
 
+static void do_first_alive_alarm(struct alarm_block *a, void *data)
+{
+	tx_queue_add_ctlmsg(NET_F_RESYNC, 0, 0);
+	notrack_xmit();
+	
+	tx_queue_add_ctlmsg2(NET_F_ALIVE);
+	add_alarm(&alive_alarm, ALIVE_INT, 0);
+}
+
 static int notrack_init(void)
 {
+	init_alarm(&f_alive_alarm, NULL, do_first_alive_alarm);
 	init_alarm(&alive_alarm, NULL, do_alive_alarm);
 	add_alarm(&alive_alarm, ALIVE_INT, 0);
-	
-	tx_queue_add_ctlmsg(NET_F_RESYNC, 0, 0);
 	
 	return 0;
 }
