@@ -65,7 +65,7 @@ static void external_inject_ct_new(struct nf_conntrack *ct)
 	int ret, retry = 1;
 
 retry:
-	if (nl_create_conntrack(inject, ct, 0) == -1) {
+	if (nl_create_conntrack(inject, ct, CONFIG(commit_timeout)) == -1) {
 		/* if the state entry exists, we delete and try again */
 		if (errno == EEXIST && retry == 1) {
 			ret = nl_destroy_conntrack(inject, ct);
@@ -93,14 +93,14 @@ static void external_inject_ct_upd(struct nf_conntrack *ct)
 	int ret;
 
 	/* if we successfully update the entry, everything is OK */
-	if (nl_update_conntrack(inject, ct, 0) != -1) {
+	if (nl_update_conntrack(inject, ct, CONFIG(commit_timeout)) != -1) {
 		external_inject_stat.upd_ok++;
 		return;
 	}
 
 	/* state entries does not exist, we have to create it */
 	if (errno == ENOENT) {
-		if (nl_create_conntrack(inject, ct, 0) == -1) {
+		if (nl_create_conntrack(inject, ct, CONFIG(commit_timeout)) == -1) {
 			external_inject_stat.upd_fail++;
 			dlog(LOG_ERR, "inject-upd1: %s", strerror(errno));
 			dlog_ct(STATE(log), ct, NFCT_O_PLAIN);
