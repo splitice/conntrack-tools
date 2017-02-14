@@ -106,7 +106,7 @@ void channel_stats_extended(struct channel *c, int active,
 
 int channel_type(struct channel *c);
 
-#define MULTICHANNEL_MAX	4
+#define MULTICHANNEL_MAX	16
 
 struct multichannel {
 	int		channel_num;
