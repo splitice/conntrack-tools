@@ -129,7 +129,7 @@ static void external_inject_ct_upd(struct nf_conntrack *ct)
 	dlog_ct(STATE(log), ct, NFCT_O_PLAIN);
 }
 
-static void external_inject_ct_del(struct nf_conntrack *ct)
+static bool external_inject_ct_del(struct nf_conntrack *ct)
 {
 	if (nl_destroy_conntrack(inject, ct) == -1) {
 		if (errno != ENOENT) {
@@ -140,6 +140,7 @@ static void external_inject_ct_del(struct nf_conntrack *ct)
 	} else {
 		external_inject_stat.del_ok++;
 	}
+	return true;
 }
 
 static void external_inject_ct_dump(int fd, int type)
@@ -212,7 +213,7 @@ retry:
 	}
 }
 
-static void external_inject_exp_del(struct nf_expect *exp)
+static bool external_inject_exp_del(struct nf_expect *exp)
 {
 	if (nl_destroy_expect(inject, exp) == -1) {
 		if (errno != ENOENT) {
@@ -223,6 +224,7 @@ static void external_inject_exp_del(struct nf_expect *exp)
 	} else {
 		exp_external_inject_stat.del_ok++;
 	}
+	return true;
 }
 
 static void external_inject_exp_dump(int fd, int type)

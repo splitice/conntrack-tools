@@ -10,7 +10,7 @@ struct external_handler {
 	struct {
 		void	(*new)(struct nf_conntrack *ct);
 		void	(*upd)(struct nf_conntrack *ct);
-		void	(*del)(struct nf_conntrack *ct);
+		bool	(*del)(struct nf_conntrack *ct);
 
 		void	(*dump)(int fd, int type);
 		void	(*flush)(void);
@@ -21,7 +21,7 @@ struct external_handler {
 	struct {
 		void	(*new)(struct nf_expect *exp);
 		void	(*upd)(struct nf_expect *exp);
-		void	(*del)(struct nf_expect *exp);
+		bool	(*del)(struct nf_expect *exp);
 
 		void	(*dump)(int fd, int type);
 		void	(*flush)(void);

@@ -97,13 +97,6 @@ do_channel_handler_step(struct channel *c, struct nethdr *net, size_t remain)
 		return;
 	}
 	
-	if(IS_DATA(net) && !IS_ACK(net) && !IS_NACK(net) && !IS_RESYNC(net) && !IS_ALIVE(net)){
-		// Relay to all
-		if(net->type <= NET_T_STATE_MAX) {
-			handle_relay(c, net);
-		}
-	}
-	
 	HDR_NETWORK2HOST(net);
 	
 	switch (STATE_SYNC(sync)->recv(net)) {
@@ -135,36 +128,43 @@ do_channel_handler_step(struct channel *c, struct nethdr *net, size_t remain)
 		if (ct == NULL)
 			return;
 		STATE_SYNC(external)->ct.new(ct);
+		handle_relay(c, net);
 		break;
 	case NET_T_STATE_CT_UPD:
 		ct = msg2ct_alloc(net, remain);
 		if (ct == NULL)
 			return;
 		STATE_SYNC(external)->ct.upd(ct);
+		handle_relay(c, net);
 		break;
 	case NET_T_STATE_CT_DEL:
 		ct = msg2ct_alloc(net, remain);
 		if (ct == NULL)
 			return;
-		STATE_SYNC(external)->ct.del(ct);
+		if(STATE_SYNC(external)->ct.del(ct)){
+			handle_relay(c, net);
+		}
 		break;
 	case NET_T_STATE_EXP_NEW:
 		exp = msg2exp_alloc(net, remain);
 		if (exp == NULL)
 			return;
 		STATE_SYNC(external)->exp.new(exp);
+		handle_relay(c, net);
 		break;
 	case NET_T_STATE_EXP_UPD:
 		exp = msg2exp_alloc(net, remain);
 		if (exp == NULL)
 			return;
 		STATE_SYNC(external)->exp.upd(exp);
+		handle_relay(c, net);
 		break;
 	case NET_T_STATE_EXP_DEL:
 		exp = msg2exp_alloc(net, remain);
 		if (exp == NULL)
 			return;
 		STATE_SYNC(external)->exp.del(exp);
+		handle_relay(c, net);
 		break;
 	default:
 		STATE_SYNC(error).msg_rcv_malformed++;
