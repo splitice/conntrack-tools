@@ -154,7 +154,7 @@ do_channel_handler_step(struct channel *c, struct nethdr *net, size_t remain)
 		if (ct == NULL)
 			goto reverse_relay;
 		if(!STATE_SYNC(external)->ct.del(ct)){
-			goto reverse_relay;
+			reverse_relay(c, net);
 		}
 		break;
 	case NET_T_STATE_EXP_NEW:
