@@ -81,6 +81,10 @@ static void
 handle_relay(struct channel *c, struct nethdr *net){
 	if(!c->channel_relay_mode) return;
 	
+	//Restore order
+	net->len = htons(net->len);
+	net->seq = htonl(net->seq);
+	
 	multichannel_send_allbut(STATE_SYNC(channel), net, c);
 }
 
