@@ -127,19 +127,17 @@ retry:
 		if (obj == NULL) {
 retry2:
 			obj = cache_object_new(external_fast, ct);
-			if (obj == NULL) {
-				if (obj == NULL)
-					return;
-
-				if (cache_add(external, obj, id) == -1) {
-					cache_object_free(obj);
-					return;
-				}
-			} else {
-				cache_del(external_fast, obj);
-				cache_object_free(obj);
-				goto retry2;
+			if(obj == NULL){
+				return;
 			}
+			if (cache_add(external, obj, id) == -1) {
+				cache_object_free(obj);
+				return;
+			}
+		} else {
+			cache_del(external_fast, obj);
+			cache_object_free(obj);
+			goto retry2;
 		}
 	} else {
 		cache_del(external, obj);
