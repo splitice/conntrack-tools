@@ -55,6 +55,8 @@ static int fast_iterate(void *data1, void *n)
 	struct cache_object *obj = n;
 	int id;
 
+	if(obj->status == C_OBJ_DEAD) return 0;
+	
 	//TODO: actively query liveness?
 	/*if(time_cached() > (obj->lastupdate + 180))
 	{
