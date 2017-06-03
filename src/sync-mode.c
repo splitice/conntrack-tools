@@ -103,7 +103,14 @@ do_channel_handler_step(struct channel *c, struct nethdr *net, size_t remain)
 		net->len = ntohs(net->len);
 		return;
 	}
-	
+		
+	if(IS_DATA(net) && !IS_ACK(net) && !IS_NACK(net) && !IS_RESYNC(net) && !IS_ALIVE(net)){
+		// Relay to all
+		if(net->type <= NET_T_STATE_MAX) {
+			handle_relay(c, net);
+		}
+	}
+
 	HDR_NETWORK2HOST(net);
 	
 	switch (STATE_SYNC(sync)->recv(net)) {
@@ -127,13 +134,6 @@ do_channel_handler_step(struct channel *c, struct nethdr *net, size_t remain)
 		STATE_SYNC(error).msg_rcv_malformed++;
 		STATE_SYNC(error).msg_rcv_bad_type++;
 		return;
-	}
-	
-	if(IS_DATA(net) && !IS_ACK(net) && !IS_NACK(net) && !IS_RESYNC(net) && !IS_ALIVE(net)){
-		// Relay to all
-		if(net->type <= NET_T_STATE_MAX) {
-			handle_relay(c, net);
-		}
 	}
 
 	switch(net->type) {
