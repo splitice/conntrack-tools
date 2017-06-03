@@ -53,6 +53,7 @@ static void excache_notrack_add(struct cache_object *obj, void *data)
 static int fast_iterate(void *data1, void *n)
 {
 	struct cache_object *obj = n;
+	int id;
 
 	if(time_cached() > obj->lastupdate + 180)
 	{
@@ -64,7 +65,8 @@ static int fast_iterate(void *data1, void *n)
 	{
 		puts("Elevating fast connection\n");
 		cache_del(external_fast, obj);
-		cache_add(external, obj);
+		id = hashtable_hash(external->h, obj->ptr);
+		cache_add(external, obj, id);
 	}
 	return 0;
 }
