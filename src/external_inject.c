@@ -129,7 +129,7 @@ static void external_inject_ct_upd(struct nf_conntrack *ct)
 	dlog_ct(STATE(log), ct, NFCT_O_PLAIN);
 }
 
-static bool external_inject_ct_del(struct nf_conntrack *ct)
+static int external_inject_ct_del(struct nf_conntrack *ct)
 {
 	if (nl_destroy_conntrack(inject, ct) == -1) {
 		if (errno != ENOENT) {
@@ -213,7 +213,7 @@ retry:
 	}
 }
 
-static bool external_inject_exp_del(struct nf_expect *exp)
+static int external_inject_exp_del(struct nf_expect *exp)
 {
 	if (nl_destroy_expect(inject, exp) == -1) {
 		if (errno != ENOENT) {
