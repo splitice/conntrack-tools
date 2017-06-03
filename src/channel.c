@@ -276,7 +276,7 @@ retry:
 	if (c->buffer->len + len < c->buffer->size) {
 		memcpy(c->buffer->data + c->buffer->len, net, len);
 		c->buffer->len += len;
-	} else if(len < c->buffer->size){
+	} else if(len <= c->buffer->size){
 		/* Sending a packet longer than the buffering length
 		 * should not ever happen, but it might. If so drop. */
 		if (pending_errors) {
@@ -300,6 +300,7 @@ retry:
 int channel_reverse(struct channel *c, uint32_t length)
 {
 	c->buffer->len -= length;
+	return 0;
 }
 
 
