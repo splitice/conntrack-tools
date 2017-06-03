@@ -49,10 +49,23 @@ static void excache_notrack_add(struct cache_object *obj, void *data)
 	cn->owner = STATE_SYNC(channel)->current;
 }
 
-static int fast_iterate(void *data1, void *data2)
+#include <stdio.h>
+static int fast_iterate(void *data1, void *n)
 {
-	list_del(data2);
-	external_fast->h->count--;
+	struct cache_object *obj = n;
+
+	if(time_cached() > obj->lastupdate + 180)
+	{
+		puts("Clearing fast connection\n");
+		cache_del(external_fast, obj);
+		cache_object_free(obj);
+	}
+	else if(time_cached() > obj->lifetime + 300)
+	{
+		puts("Elevating fast connection\n");
+		cache_del(external_fast, obj);
+		cache_add(external, obj);
+	}
 	return 0;
 }
 
