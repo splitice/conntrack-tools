@@ -106,6 +106,9 @@ void channel_stats_extended(struct channel *c, int active,
 
 int channel_type(struct channel *c);
 
+int channel_presend(struct channel *c, const struct nethdr *net);
+int channel_reverse(struct channel *c, uint32_t length);
+
 #define MULTICHANNEL_MAX	16
 
 struct multichannel {
@@ -118,6 +121,7 @@ struct multichannel *multichannel_open(struct channel_conf *conf, int len);
 void multichannel_close(struct multichannel *m);
 
 int multichannel_send_allbut(struct multichannel *m, const struct nethdr *net, struct channel* ex);
+int multichannel_reverse_allbut(struct multichannel *m, uint32_t length, struct channel* ex);
 int multichannel_send(struct multichannel *c, const struct nethdr *net);
 int multichannel_send_flush(struct multichannel *c);
 int multichannel_recv(struct multichannel *c, char *buf, int size);

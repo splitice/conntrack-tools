@@ -260,6 +260,49 @@ retry:
 	return ret;
 }
 
+
+int channel_presend(struct channel *c, const struct nethdr *net)
+{
+	int ret = 0, len = ntohs(net->len), pending_errors;
+
+	pending_errors = channel_handle_errors(c);
+
+	if (!(c->channel_flags & CHANNEL_F_BUFFERED)) {
+		c->ops->send(c->data, net, len);
+		return 1;
+	}
+	
+retry:
+	if (c->buffer->len + len <= c->buffer->size) {
+		memcpy(c->buffer->data + c->buffer->len, net, len);
+		c->buffer->len += len;
+	} else if(len <= c->buffer->size){
+		/* Sending a packet longer than the buffering length
+		 * should not ever happen, but it might. If so drop. */
+		if (pending_errors) {
+			channel_enqueue_errors(c);
+		} else {	
+			ret = c->ops->send(c->data, c->buffer->data,
+					   c->buffer->len);
+			if (ret == -1 &&
+			    (c->channel_flags & CHANNEL_F_ERRORS)) {
+				/* Give it another chance to deliver. */
+				channel_enqueue_errors(c);
+			}
+		}
+		ret = 1;
+		c->buffer->len = 0;
+		goto retry;
+	}
+	return ret;
+}
+
+int channel_reverse(struct channel *c, uint32_t length)
+{
+	c->buffer->len -= length;
+}
+
+
 int channel_send_flush(struct channel *c)
 {
 	int ret, pending_errors;

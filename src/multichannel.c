@@ -54,7 +54,18 @@ int multichannel_send_allbut(struct multichannel *m, const struct nethdr *net, s
 	int i;
 	for (i = 0; i < m->channel_num; i++) {
 		if(m->channel[i] != ex)
-			ret |= channel_send(m->channel[i], net);
+			ret |= channel_presend(m->channel[i], net);
+	}
+	return ret;
+}
+
+int multichannel_reverse_allbut(struct multichannel *m, uint32_t length, struct channel* ex)
+{
+	int ret = 0;
+	int i;
+	for (i = 0; i < m->channel_num; i++) {
+		if(m->channel[i] != ex)
+			ret |= channel_reverse(m->channel[i], length);
 	}
 	return ret;
 }
@@ -64,7 +75,7 @@ int multichannel_send(struct multichannel *m, const struct nethdr *net)
 	int ret = 0;
 	int i;
 	for (i = 0; i < m->channel_num; i++) {
-		ret |= channel_send(m->channel[i], net);
+		ret |= channel_presend(m->channel[i], net);
 	}
 	return ret;
 }

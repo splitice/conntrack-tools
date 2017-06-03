@@ -81,11 +81,14 @@ static void
 handle_relay(struct channel *c, struct nethdr *net){
 	if(!c->channel_relay_mode) return;
 	
-	//Restore order
-	net->len = htons(net->len);
-	net->seq = htonl(net->seq);
-	
 	multichannel_send_allbut(STATE_SYNC(channel), net, c);
+}
+
+static void
+reverse_relay(struct channel *c, struct nethdr *net){
+	if(!c->channel_relay_mode) return;
+	
+	multichannel_reverse_allbut(STATE_SYNC(channel), net->len, c);
 }
 
 static void
@@ -125,6 +128,13 @@ do_channel_handler_step(struct channel *c, struct nethdr *net, size_t remain)
 		STATE_SYNC(error).msg_rcv_bad_type++;
 		return;
 	}
+	
+	if(IS_DATA(net) && !IS_ACK(net) && !IS_NACK(net) && !IS_RESYNC(net) && !IS_ALIVE(net)){
+		// Relay to all
+		if(net->type <= NET_T_STATE_MAX) {
+			handle_relay(c, net);
+		}
+	}
 
 	switch(net->type) {
 	case NET_T_STATE_CT_NEW:
@@ -132,21 +142,19 @@ do_channel_handler_step(struct channel *c, struct nethdr *net, size_t remain)
 		if (ct == NULL)
 			return;
 		STATE_SYNC(external)->ct.new(ct);
-		handle_relay(c, net);
 		break;
 	case NET_T_STATE_CT_UPD:
 		ct = msg2ct_alloc(net, remain);
 		if (ct == NULL)
 			return;
 		STATE_SYNC(external)->ct.upd(ct);
-		handle_relay(c, net);
 		break;
 	case NET_T_STATE_CT_DEL:
 		ct = msg2ct_alloc(net, remain);
 		if (ct == NULL)
 			return;
 		if(STATE_SYNC(external)->ct.del(ct)){
-			handle_relay(c, net);
+			reverse_relay(c, net);
 		}
 		break;
 	case NET_T_STATE_EXP_NEW:
@@ -154,21 +162,18 @@ do_channel_handler_step(struct channel *c, struct nethdr *net, size_t remain)
 		if (exp == NULL)
 			return;
 		STATE_SYNC(external)->exp.new(exp);
-		handle_relay(c, net);
 		break;
 	case NET_T_STATE_EXP_UPD:
 		exp = msg2exp_alloc(net, remain);
 		if (exp == NULL)
 			return;
 		STATE_SYNC(external)->exp.upd(exp);
-		handle_relay(c, net);
 		break;
 	case NET_T_STATE_EXP_DEL:
 		exp = msg2exp_alloc(net, remain);
 		if (exp == NULL)
 			return;
 		STATE_SYNC(external)->exp.del(exp);
-		handle_relay(c, net);
 		break;
 	default:
 		STATE_SYNC(error).msg_rcv_malformed++;
