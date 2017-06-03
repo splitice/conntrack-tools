@@ -60,7 +60,7 @@ static void do_gc_fast(struct alarm_block *a, void *data)
 {
 	uint32_t steps;
 	
-	steps = cache_iterate_limit(external_fast, 1, fast_previous, FAST_STEPS, fast_iterate);
+	steps = cache_iterate_limit(external_fast, NULL, fast_previous, FAST_STEPS, fast_iterate);
 	add_alarm(&fast_alarm, 15, 0);
 }
 
@@ -99,7 +99,7 @@ static int external_cache_init(void)
 	fast_previous = 0;
 	slow_previous = 0;
 	
-	init_alarm(&fast_alarm, 15, 0, NULL, do_gc_fast);
+	init_alarm(&fast_alarm, NULL, do_gc_fast);
 	init_alarm(&slow_alarm, NULL, do_gc_slow);
 	
 	add_alarm(&fast_alarm, 15, 0);
