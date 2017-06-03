@@ -37,25 +37,17 @@ static struct alarm_block slow_alarm;
 
 static uint32_t fast_previous, slow_previous;
 
-struct excache_notrack {
-	void* owner;
-	struct cache_object	*obj;
-};
-
-static void excache_notrack_add(struct cache_object *obj, void *data)
-{
-	struct excache_notrack *cn = data;
-	cn->obj = obj;
-	cn->owner = STATE_SYNC(channel)->current;
-}
-
 #include <stdio.h>
 static int fast_iterate(void *data1, void *n)
 {
 	struct cache_object *obj = n;
 	int id;
 
-	if(obj->status == C_OBJ_DEAD) return 0;
+	if(obj->status == C_OBJ_DEAD) {
+		cache_del(external, obj);
+		cache_object_free(obj);
+		return 0;
+	}
 	
 	//TODO: actively query liveness?
 	/*if(time_cached() > (obj->lastupdate + 180))
@@ -71,8 +63,8 @@ static int fast_iterate(void *data1, void *n)
 	if(time_cached() > (obj->lifetime + 300))
 	{
 		puts("Elevating fast connection\n");
-		cache_del(external_fast, obj);
 		id = hashtable_hash(external->h, obj->ptr);
+		cache_del(external_fast, obj);
 		cache_add(external, obj, id);
 	}
 	
@@ -267,6 +259,9 @@ static void external_cache_ct_stats(int fd)
 
 static void external_cache_ct_stats_ext(int fd)
 {
+	send(fd, "New:\n", 5, 0);
+	cache_stats_extended(external_fast, fd);
+	send(fd, "Old:\n", 5, 0);
 	cache_stats_extended(external, fd);
 }
 
