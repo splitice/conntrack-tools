@@ -55,26 +55,28 @@ static int fast_iterate(void *data1, void *n)
 	struct cache_object *obj = n;
 	int id;
 
-	if(time_cached() > obj->lastupdate + 180)
+	if(time_cached() > (obj->lastupdate + 180))
 	{
 		puts("Clearing fast connection\n");
 		cache_del(external_fast, obj);
 		cache_object_free(obj);
 	}
-	else if(time_cached() > obj->lifetime + 300)
+	else if(time_cached() > (obj->lifetime + 300))
 	{
 		puts("Elevating fast connection\n");
 		cache_del(external_fast, obj);
 		id = hashtable_hash(external->h, obj->ptr);
 		cache_add(external, obj, id);
 	}
+	
+	
 	return 0;
 }
 static int slow_iterate(void *data1, void *n)
 {
 	struct cache_object *obj = n;
 
-	if(time_cached() > obj->lastupdate + 1800)//30 minutes
+	if(time_cached() > (obj->lastupdate + 1800))//30 minutes
 	{
 		puts("Clearing slow connection\n");
 		cache_del(external, obj);
@@ -92,7 +94,7 @@ static void do_gc_fast(struct alarm_block *a, void *data)
 	if(steps != FAST_STEPS){
 		fast_previous = 0;
 	}else{
-		fast_previous = steps;
+		fast_previous += steps;
 	}
 	add_alarm(&fast_alarm, 15, 0);
 }
@@ -105,7 +107,7 @@ static void do_gc_slow(struct alarm_block *a, void *data)
 	if(steps != SLOW_STEPS){
 		slow_previous = 0;
 	}else{
-		slow_previous = steps;
+		slow_previous += steps;
 	}
 	add_alarm(&slow_alarm, 30, 0);
 }
@@ -170,7 +172,7 @@ retry2:
 			if(obj == NULL){
 				return;
 			}
-			if (cache_add(external, obj, id) == -1) {
+			if (cache_add(external_fast, obj, id) == -1) {
 				cache_object_free(obj);
 				return;
 			}
