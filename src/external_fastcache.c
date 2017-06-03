@@ -55,13 +55,18 @@ static int fast_iterate(void *data1, void *n)
 	struct cache_object *obj = n;
 	int id;
 
-	if(time_cached() > (obj->lastupdate + 180))
+	//TODO: actively query liveness?
+	/*if(time_cached() > (obj->lastupdate + 180))
 	{
 		puts("Clearing fast connection\n");
 		cache_del(external_fast, obj);
 		cache_object_free(obj);
 	}
-	else if(time_cached() > (obj->lifetime + 300))
+	else */
+	
+	//TODO: check for mark or DNAT
+	
+	if(time_cached() > (obj->lifetime + 300))
 	{
 		puts("Elevating fast connection\n");
 		cache_del(external_fast, obj);
@@ -76,7 +81,7 @@ static int slow_iterate(void *data1, void *n)
 {
 	struct cache_object *obj = n;
 
-	if(time_cached() > (obj->lastupdate + 1800))//30 minutes
+	if(time_cached() > (obj->lastupdate + 21600))//30 minutes
 	{
 		puts("Clearing slow connection\n");
 		cache_del(external, obj);
@@ -208,6 +213,9 @@ static void external_cache_ct_del(struct nf_conntrack *ct)
 
 	obj = cache_find(external, ct, &id);
 	if (obj) {
+		if(obj->owner != STATE_SYNC(channel)->current){
+			return;
+		}
 		cache_del(external, obj);
 		cache_object_free(obj);
 		return;
@@ -215,7 +223,7 @@ static void external_cache_ct_del(struct nf_conntrack *ct)
 	
 	obj = cache_find(external_fast, ct, &id);
 	if (obj) {
-		cache_del(external, obj);
+		cache_del(external_fast, obj);
 		cache_object_free(obj);
 		return;
 	}

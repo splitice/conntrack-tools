@@ -210,6 +210,7 @@ int cache_add(struct cache *c, struct cache_object *obj, int id)
 {
 	int ret;
 
+	obj->owner = STATE_SYNC(channel)->current;
 	ret = __add(c, obj, id);
 	if (ret == -1) {
 		c->stats.add_fail++;
@@ -239,6 +240,7 @@ void cache_update(struct cache *c, struct cache_object *obj, int id, void *ptr)
 	c->stats.upd_ok++;
 	obj->lastupdate = time_cached();
 	obj->status = C_OBJ_ALIVE;
+	obj->owner = STATE_SYNC(channel)->current;
 }
 
 static void __del(struct cache *c, struct cache_object *obj)
