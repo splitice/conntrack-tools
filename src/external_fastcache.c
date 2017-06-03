@@ -70,6 +70,20 @@ static int fast_iterate(void *data1, void *n)
 	}
 	return 0;
 }
+static int slow_iterate(void *data1, void *n)
+{
+	struct cache_object *obj = n;
+	int id;
+
+	if(time_cached() > obj->lastupdate + 1800)//30 minutes
+	{
+		puts("Clearing slow connection\n");
+		cache_del(external, obj);
+		cache_object_free(obj);
+	}
+	
+	return 0;
+}
 
 static void do_gc_fast(struct alarm_block *a, void *data)
 {
@@ -78,13 +92,20 @@ static void do_gc_fast(struct alarm_block *a, void *data)
 	steps = cache_iterate_limit(external_fast, NULL, fast_previous, FAST_STEPS, fast_iterate);
 	if(steps != FAST_STEPS){
 		fast_previous = 0;
+	}else{
+		fast_previous = steps;
 	}
 	add_alarm(&fast_alarm, 15, 0);
 }
 
 static void do_gc_slow(struct alarm_block *a, void *data)
 {
-	
+	steps = cache_iterate_limit(external, NULL, slow_previous, SLOW_STEPS, slow_iterate);
+	if(steps != SLOW_STEPS){
+		slow_previous = 0;
+	}else{
+		slow_previous = steps;
+	}
 	add_alarm(&slow_alarm, 30, 0);
 }
 
