@@ -38,7 +38,7 @@ static struct alarm_block slow_alarm;
 static uint32_t fast_previous, slow_previous;
 
 struct excache_notrack {
-	struct void* owner;
+	void* owner;
 	struct cache_object	*obj;
 };
 
@@ -49,7 +49,8 @@ static void excache_notrack_add(struct cache_object *obj, void *data)
 	cn->owner = STATE_SYNC(channel)->current;
 }
 
-int fast_iterate(void *data1, void *data2){
+static int fast_iterate(void *data1, void *data2)
+{
 	list_del(data2);
 	external_fast->h->count--;
 	return 0;
@@ -187,7 +188,7 @@ static void external_cache_ct_dump(int fd, int type)
 
 static int external_cache_ct_commit(struct nfct_handle *h, int fd)
 {
-	return cache_commit(external, h, fd) && cache_dump(external_fast, fd, type);;
+	return (cache_commit(external, h, fd) && cache_dump(external_fast, fd, type));
 }
 
 static void external_cache_ct_flush(void)
