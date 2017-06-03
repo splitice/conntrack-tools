@@ -140,39 +140,39 @@ do_channel_handler_step(struct channel *c, struct nethdr *net, size_t remain)
 	case NET_T_STATE_CT_NEW:
 		ct = msg2ct_alloc(net, remain);
 		if (ct == NULL)
-			return;
+			goto reverse_relay;
 		STATE_SYNC(external)->ct.new(ct);
 		break;
 	case NET_T_STATE_CT_UPD:
 		ct = msg2ct_alloc(net, remain);
 		if (ct == NULL)
-			return;
+			goto reverse_relay;
 		STATE_SYNC(external)->ct.upd(ct);
 		break;
 	case NET_T_STATE_CT_DEL:
 		ct = msg2ct_alloc(net, remain);
 		if (ct == NULL)
-			return;
-		if(STATE_SYNC(external)->ct.del(ct)){
-			reverse_relay(c, net);
+			goto reverse_relay;
+		if(!STATE_SYNC(external)->ct.del(ct)){
+			goto reverse_relay;
 		}
 		break;
 	case NET_T_STATE_EXP_NEW:
 		exp = msg2exp_alloc(net, remain);
 		if (exp == NULL)
-			return;
+			goto reverse_relay;
 		STATE_SYNC(external)->exp.new(exp);
 		break;
 	case NET_T_STATE_EXP_UPD:
 		exp = msg2exp_alloc(net, remain);
 		if (exp == NULL)
-			return;
+			goto reverse_relay;
 		STATE_SYNC(external)->exp.upd(exp);
 		break;
 	case NET_T_STATE_EXP_DEL:
 		exp = msg2exp_alloc(net, remain);
 		if (exp == NULL)
-			return;
+			goto reverse_relay;
 		STATE_SYNC(external)->exp.del(exp);
 		break;
 	default:
@@ -184,6 +184,11 @@ do_channel_handler_step(struct channel *c, struct nethdr *net, size_t remain)
 		nfct_destroy(ct);
 	if (exp != NULL)
 		nfexp_destroy(exp);
+	
+	return;
+	
+reverse_relay:
+	reverse_relay(c, net);
 }
 
 static char __net[65536];		/* XXX: maximum MTU for IPv4 */
