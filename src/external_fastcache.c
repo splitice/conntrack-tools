@@ -150,6 +150,7 @@ retry2:
 
 static void external_cache_ct_upd(struct nf_conntrack *ct)
 {
+	struct cache_object *obj;
 	int id;
 
 	obj = cache_find(external, ct, &id);
