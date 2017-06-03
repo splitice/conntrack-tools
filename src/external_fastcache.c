@@ -73,7 +73,6 @@ static int fast_iterate(void *data1, void *n)
 static int slow_iterate(void *data1, void *n)
 {
 	struct cache_object *obj = n;
-	int id;
 
 	if(time_cached() > obj->lastupdate + 1800)//30 minutes
 	{
@@ -100,6 +99,8 @@ static void do_gc_fast(struct alarm_block *a, void *data)
 
 static void do_gc_slow(struct alarm_block *a, void *data)
 {
+	uint32_t steps;
+	
 	steps = cache_iterate_limit(external, NULL, slow_previous, SLOW_STEPS, slow_iterate);
 	if(steps != SLOW_STEPS){
 		slow_previous = 0;
