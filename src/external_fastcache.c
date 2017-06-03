@@ -244,7 +244,9 @@ static void external_cache_ct_dump(int fd, int type)
 
 static int external_cache_ct_commit(struct nfct_handle *h, int fd)
 {
-	return (cache_commit(external, h, fd) && cache_commit(external_fast, h, fd));
+	int ret = cache_commit(external, h, fd);
+	ret |= cache_commit(external_fast, h, fd);
+	return ret;
 }
 
 static void external_cache_ct_flush(void)
@@ -255,6 +257,9 @@ static void external_cache_ct_flush(void)
 
 static void external_cache_ct_stats(int fd)
 {
+	send(fd, "New:\n", 5, 0);
+	cache_stats(external_fast, fd);
+	send(fd, "Old:\n", 5, 0);
 	cache_stats(external, fd);
 }
 
