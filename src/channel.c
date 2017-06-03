@@ -264,7 +264,7 @@ retry:
 int channel_presend(struct channel *c, const struct nethdr *net)
 {
 	int ret = 0, len = ntohs(net->len), pending_errors;
-	printf("len: +%d\n", len);
+	//printf("len: +%d\n", len);
 
 	pending_errors = channel_handle_errors(c);
 
@@ -300,7 +300,7 @@ retry:
 
 int channel_reverse(struct channel *c, uint32_t length)
 {
-	printf("len: -%d\n", length);
+	//printf("len: -%d\n", length);
 	c->buffer->len -= length;
 	return 0;
 }
