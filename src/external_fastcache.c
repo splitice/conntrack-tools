@@ -206,7 +206,7 @@ static void external_cache_ct_upd(struct nf_conntrack *ct)
 	}
 }
 
-static void external_cache_ct_del(struct nf_conntrack *ct)
+static int external_cache_ct_del(struct nf_conntrack *ct)
 {
 	struct cache_object *obj;
 	int id;
@@ -291,7 +291,7 @@ static void external_cache_exp_upd(struct nf_expect *exp)
 	cache_update_force(external_exp, exp);
 }
 
-static bool external_cache_exp_del(struct nf_expect *exp)
+static int external_cache_exp_del(struct nf_expect *exp)
 {
 	struct cache_object *obj;
 	int id;
