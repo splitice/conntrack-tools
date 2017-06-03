@@ -412,7 +412,8 @@ static int init_sync(void)
 		return -1;
 
 	if (CONFIG(sync).external_cache_disable == 0) {
-		STATE_SYNC(external) = &external_cache;
+		//STATE_SYNC(external) = &external_cache;
+		STATE_SYNC(external) = &external_fastcache;
 	} else {
 		STATE_SYNC(external) = &external_inject;
 		dlog(LOG_NOTICE, "disabling external cache");

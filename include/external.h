@@ -33,5 +33,6 @@ struct external_handler {
 
 extern struct external_handler external_cache;
 extern struct external_handler external_inject;
+extern struct external_handler external_fastcache;
 
 #endif
