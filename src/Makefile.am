@@ -49,7 +49,7 @@ conntrackd_SOURCES = alarm.c main.c run.c hash.c queue.c rbtree.c \
 		    build.c parse.c \
 		    channel.c multichannel.c channel_mcast.c channel_udp.c \
 		    tcp.c channel_tcp.c \
-		    external_cache.c external_inject.c \
+		    external_cache.c external_inject.c external_fastcache.c \
 		    internal_cache.c internal_bypass.c \
 		    read_config_yy.y read_config_lex.l \
 		    stack.c

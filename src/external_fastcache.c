@@ -29,6 +29,14 @@ static struct cache *external_fast;
 static struct cache *external;
 static struct cache *external_exp;
 
+static struct alarm_block fast_alarm;
+static struct alarm_block slow_alarm;
+
+#define FAST_STEPS 3000
+#define SLOW_STEPS 3000
+
+static uint32_t fast_previous, slow_previous;
+
 struct excache_notrack {
 	struct void* owner;
 	struct cache_object	*obj;
@@ -41,6 +49,25 @@ static void excache_notrack_add(struct cache_object *obj, void *data)
 	cn->owner = STATE_SYNC(channel)->current;
 }
 
+int fast_iterate(void *data1, void *data2){
+	list_del(data2);
+	external_fast->h->count--;
+	return 0;
+}
+
+static void do_gc_fast(struct alarm_block *a, void *data)
+{
+	uint32_t steps;
+	
+	steps = cache_iterate_limit(external_fast, 1, fast_previous, FAST_STEPS, fast_iterate);
+	add_alarm(&fast_alarm, 15, 0);
+}
+
+static void do_gc_slow(struct alarm_block *a, void *data)
+{
+	
+	add_alarm(&slow_alarm, 30, 0);
+}
 
 static int external_cache_init(void)
 {
@@ -67,6 +94,15 @@ static int external_cache_init(void)
 		dlog(LOG_ERR, "can't allocate memory for the external cache");
 		return -1;
 	}
+	
+	fast_previous = 0;
+	slow_previous = 0;
+	
+	init_alarm(&fast_alarm, 15, 0, NULL, do_gc_fast);
+	init_alarm(&slow_alarm, NULL, do_gc_slow);
+	
+	add_alarm(&fast_alarm, 15, 0);
+	add_alarm(&slow_alarm, 30, 0);
 
 	return 0;
 }
