@@ -140,7 +140,7 @@ static bool external_inject_ct_del(struct nf_conntrack *ct)
 	} else {
 		external_inject_stat.del_ok++;
 	}
-	return true;
+	return 1;
 }
 
 static void external_inject_ct_dump(int fd, int type)
@@ -224,7 +224,7 @@ static bool external_inject_exp_del(struct nf_expect *exp)
 	} else {
 		exp_external_inject_stat.del_ok++;
 	}
-	return true;
+	return 1;
 }
 
 static void external_inject_exp_dump(int fd, int type)

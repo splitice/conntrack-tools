@@ -214,26 +214,26 @@ static void external_cache_ct_del(struct nf_conntrack *ct)
 	obj = cache_find(external_fast, ct, &id);
 	if (obj) {
 		if(obj->owner != STATE_SYNC(channel)->current){
-			return false;
+			return 0;
 		}
 		puts("Deleting fast connection");
 		cache_del(external_fast, obj);
 		cache_object_free(obj);
-		return true;
+		return 1;
 	}
 
 	obj = cache_find(external, ct, &id);
 	if (obj) {
 		if(obj->owner != STATE_SYNC(channel)->current){
-			return false;
+			return 0;
 		}
 		puts("Deleting slow connection");
 		cache_del(external, obj);
 		cache_object_free(obj);
-		return true;
+		return 1;
 	}	
 	
-	return false;
+	return 0;
 }
 
 static void external_cache_ct_dump(int fd, int type)
@@ -302,7 +302,7 @@ static bool external_cache_exp_del(struct nf_expect *exp)
 		cache_object_free(obj);
 	}
 	
-	return true;
+	return 1;
 }
 
 static void external_cache_exp_dump(int fd, int type)

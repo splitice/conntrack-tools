@@ -92,7 +92,7 @@ static bool external_cache_ct_del(struct nf_conntrack *ct)
 		cache_del(external, obj);
 		cache_object_free(obj);
 	}
-	return true;
+	return 1;
 }
 
 static void external_cache_ct_dump(int fd, int type)
@@ -158,7 +158,7 @@ static bool external_cache_exp_del(struct nf_expect *exp)
 		cache_del(external_exp, obj);
 		cache_object_free(obj);
 	}
-	return true;
+	return 1;
 }
 
 static void external_cache_exp_dump(int fd, int type)
