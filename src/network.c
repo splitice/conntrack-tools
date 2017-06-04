@@ -53,13 +53,13 @@ static inline void __nethdr_set(struct nethdr *net, int len)
 	net->seq	= current->last_seq_sent++;
 }
 
-void nethdr_set(struct nethdr *net, struct channel* current, int type)
+void nethdr_set(struct nethdr *net, int type)
 {
 	__nethdr_set(net, NETHDR_SIZ);
 	net->type = type;
 }
 
-void nethdr_set_ack(struct nethdr *net, struct channel* current)
+void nethdr_set_ack(struct nethdr *net)
 {
 	__nethdr_set(net, NETHDR_ACK_SIZ);
 }
