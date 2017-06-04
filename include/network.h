@@ -36,6 +36,8 @@ enum nethdr_type {
 	NET_T_CTL = 10,
 };
 
+struct channel;
+
 int nethdr_align(int len);
 int nethdr_size(int len);
 void nethdr_set(struct nethdr *net, int type);

@@ -76,8 +76,7 @@ int multichannel_seqfix_allbut(struct multichannel *m, uint32_t length, struct c
 	int i;
 	for (i = 0; i < m->channel_num; i++) {
 		if(m->channel[i] != ex){
-			struct nethdr* hdr = (struct nethdr*)(m->channel[i]->buffer->data - (length+sizeof(struct nethdr)));
-			nethdr_set_seq();
+			channel_seqfix(m->channel[i], length);
 		}
 	}
 	return ret;

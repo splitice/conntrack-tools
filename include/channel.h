@@ -113,6 +113,7 @@ int channel_type(struct channel *c);
 
 int channel_presend(struct channel *c, const struct nethdr *net);
 int channel_reverse(struct channel *c, uint32_t length);
+int channel_seqfix(struct channel *c, uint32_t length);
 
 #define MULTICHANNEL_MAX	16
 
