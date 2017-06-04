@@ -65,7 +65,7 @@ void nethdr_set_ack(struct nethdr *net)
 }
 
 void nethdr_set_seq(struct nethdr *net, struct channel* current){
-	net->seq	= current->last_seq_sent++;
+	net->seq	= htons(current->last_seq_sent++);
 }
 
 void nethdr_set_ctl(struct nethdr *net)
