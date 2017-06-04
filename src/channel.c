@@ -308,7 +308,7 @@ int channel_reverse(struct channel *c, uint32_t length)
 
 void nethdr_set_seq(struct nethdr *net, struct channel* current);
 
-int channel_seqfiz(struct channel *c, uint32_t length)
+int channel_seqfix(struct channel *c, uint32_t length)
 {
 	struct nethdr* hdr = (struct nethdr*)(c->buffer->data - (length+sizeof(struct nethdr)));
 	nethdr_set_seq(hdr, c);
