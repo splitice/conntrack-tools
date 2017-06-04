@@ -85,18 +85,18 @@ handle_relay(struct channel *c, struct nethdr *net){
 }
 
 static void
-reverse_relay(struct channel *c, struct nethdr *net){
+reverse_relay(struct channel *c, uint16_t len){
 	if(!c->channel_relay_mode) return;
 	
-	multichannel_reverse_allbut(STATE_SYNC(channel), net->len, c);
+	multichannel_reverse_allbut(STATE_SYNC(channel), len, c);
 }
 
 
 static void
-relay_seqfix(struct channel *c, struct nethdr *net){
+relay_seqfix(struct channel *c, uint16_t len){
 	if(!c->channel_relay_mode) return;
 	
-	multichannel_seqfix_allbut(STATE_SYNC(channel), net->len, c);
+	multichannel_seqfix_allbut(STATE_SYNC(channel), len, c);
 }
 
 static void
@@ -104,6 +104,7 @@ do_channel_handler_step(struct channel *c, struct nethdr *net, size_t remain)
 {
 	struct nf_conntrack *ct = NULL;
 	struct nf_expect *exp = NULL;
+	uint16_t len;
 
 	if (net->version != CONNTRACKD_PROTOCOL_VERSION) {
 		STATE_SYNC(error).msg_rcv_malformed++;
@@ -116,6 +117,7 @@ do_channel_handler_step(struct channel *c, struct nethdr *net, size_t remain)
 		// Relay to all
 		if(net->type <= NET_T_STATE_MAX) {
 			handle_relay(c, net);
+			len = net->len;
 		}
 	}
 
@@ -162,7 +164,8 @@ do_channel_handler_step(struct channel *c, struct nethdr *net, size_t remain)
 		if (ct == NULL)
 			goto reverse_relay;
 		if(!STATE_SYNC(external)->ct.del(ct)){
-			reverse_relay(c, net);
+			reverse_relay(c, len);
+			goto end;
 		}
 		break;
 	case NET_T_STATE_EXP_NEW:
@@ -188,15 +191,20 @@ do_channel_handler_step(struct channel *c, struct nethdr *net, size_t remain)
 		STATE_SYNC(error).msg_rcv_bad_type++;
 		break;
 	}
+	
+	relay_seqfix(c,len);
+	
+end:
 	if (ct != NULL)
 		nfct_destroy(ct);
 	if (exp != NULL)
 		nfexp_destroy(exp);
 	
+	
 	return;
 	
 reverse_relay:
-	reverse_relay(c, net);
+	reverse_relay(c, len);
 }
 
 static char __net[65536];		/* XXX: maximum MTU for IPv4 */
