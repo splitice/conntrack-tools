@@ -188,7 +188,7 @@ do_channel_handler_step(struct channel *c, struct nethdr *net, size_t remain)
 	default:
 		STATE_SYNC(error).msg_rcv_malformed++;
 		STATE_SYNC(error).msg_rcv_bad_type++;
-		break;
+		goto end;
 	}
 	
 	relay_seqfix(c,net->len);
