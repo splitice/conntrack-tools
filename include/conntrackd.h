@@ -245,9 +245,6 @@ struct ct_sync_state {
 		uint64_t	msg_rcv_lost;
 		uint64_t	msg_rcv_before;
 	} error;
-
-	uint32_t last_seq_sent;	/* last sequence number sent */
-	uint32_t last_seq_recv;	/* last sequence number recv */
 };
 
 #define STATE_STATS(x) state.stats->x

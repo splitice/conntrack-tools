@@ -84,6 +84,9 @@ struct channel {
 	struct channel_buffer	*buffer;
 	struct channel_ops	*ops;
 	void			*data;
+	
+	//uint32_t last_seq_sent;	/* last sequence number sent */
+	uint32_t last_seq_recv;	/* last sequence number recv */
 };
 
 int channel_init(void);

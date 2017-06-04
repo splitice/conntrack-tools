@@ -80,27 +80,27 @@ int nethdr_track_seq(uint32_t seq, uint32_t *exp_seq)
 	}
 
 	/* fast path: we received the correct sequence */
-	if (seq == STATE_SYNC(last_seq_recv)+1) {
+	if (seq == STATE_SYNC(channel)->current->last_seq_recv+1) {
 		ret = SEQ_IN_SYNC;
 		goto out;
 	}
 
-	/* out of sequence: some messages got lost */
-	if (after(seq, STATE_SYNC(last_seq_recv)+1)) {
+	/* out of sequence: some messages got lost */	
+	if (after(seq, STATE_SYNC(channel)->current->last_seq_recv+1)) {
 		STATE_SYNC(error).msg_rcv_lost +=
-					seq - STATE_SYNC(last_seq_recv) + 1;
+					seq - STATE_SYNC(channel)->current->last_seq_recv + 1;
 		ret = SEQ_AFTER;
 		goto out;
 	}
 
 	/* out of sequence: replayed/delayed packet? */
-	if (before(seq, STATE_SYNC(last_seq_recv)+1)) {
+	if (before(seq, STATE_SYNC(channel)->current->last_seq_recv+1)) {
 		STATE_SYNC(error).msg_rcv_before++;
 		ret = SEQ_BEFORE;
 	}
 
 out:
-	*exp_seq = STATE_SYNC(last_seq_recv)+1;
+	*exp_seq = STATE_SYNC(channel)->current->last_seq_recv+1;
 
 	return ret;
 }
@@ -110,7 +110,7 @@ void nethdr_track_update_seq(uint32_t seq)
 	if (!local_seq_set)
 		local_seq_set = 1;
 
-	STATE_SYNC(last_seq_recv) = seq;
+	STATE_SYNC(channel)->current->last_seq_recv = seq;
 }
 
 int nethdr_track_is_seq_set()

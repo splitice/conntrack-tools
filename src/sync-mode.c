@@ -502,7 +502,7 @@ static int init_sync(void)
 	init_alarm(&STATE_SYNC(reset_cache_alarm), NULL, do_reset_cache_alarm);
 
 	/* initialization of message sequence generation */
-	STATE_SYNC(last_seq_sent) = time(NULL);
+	//STATE_SYNC(last_seq_sent) = time(NULL);
 
 	return 0;
 }
