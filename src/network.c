@@ -74,7 +74,7 @@ int nethdr_track_seq(uint32_t seq, uint32_t *exp_seq)
 	int ret = SEQ_UNKNOWN;
 
 	/* netlink sequence tracking initialization */
-	if (!local_seq_set) {
+	if (!STATE_SYNC(channel)->current->local_seq_set) {
 		ret = SEQ_UNSET;
 		goto out;
 	}
@@ -108,7 +108,7 @@ out:
 void nethdr_track_update_seq(uint32_t seq)
 {
 	if (!local_seq_set)
-		local_seq_set = 1;
+		STATE_SYNC(channel)->current->local_seq_set = 1;
 
 	STATE_SYNC(channel)->current->last_seq_recv = seq;
 }

@@ -87,6 +87,7 @@ struct channel {
 	
 	//uint32_t last_seq_sent;	/* last sequence number sent */
 	uint32_t last_seq_recv;	/* last sequence number recv */
+	uint8_t local_seq_set;
 };
 
 int channel_init(void);
