@@ -122,13 +122,9 @@ do_channel_handler_step(struct channel *c, struct nethdr *net, size_t remain)
 
 	HDR_NETWORK2HOST(net);
 	
+	multichannel_change_current_channel(STATE_SYNC(channel), c);
+	
 	switch (STATE_SYNC(sync)->recv(net)) {
-	case MSG_DATA:
-		multichannel_change_current_channel(STATE_SYNC(channel), c);
-		break;
-	case MSG_CTL:
-		multichannel_change_current_channel(STATE_SYNC(channel), c);
-		return;
 	case MSG_BAD:
 		STATE_SYNC(error).msg_rcv_malformed++;
 		STATE_SYNC(error).msg_rcv_bad_header++;

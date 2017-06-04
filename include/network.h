@@ -40,9 +40,9 @@ struct channel;
 
 int nethdr_align(int len);
 int nethdr_size(int len);
-void nethdr_set(struct nethdr *net, int type);
-void nethdr_set_ack(struct nethdr *net);
-void nethdr_set_ctl(struct nethdr *net);
+void nethdr_set(struct nethdr *net, struct channel* current, int type);
+void nethdr_set_ack(struct nethdr *net), struct channel* current;
+void nethdr_set_ctl(struct nethdr *net, struct channel* current);
 void nethdr_set_seq(struct nethdr *net, struct channel* current);
 
 struct cache_object;
@@ -120,9 +120,9 @@ enum {
 	SEQ_BEFORE,
 };
 
-int nethdr_track_seq(uint32_t seq, uint32_t *exp_seq);
-void nethdr_track_update_seq(uint32_t seq);
-int nethdr_track_is_seq_set(void);
+int nethdr_track_seq(uint32_t seq, uint32_t *exp_seq,struct channel* current);
+void nethdr_track_update_seq(uint32_t seq,struct channel* current);
+int nethdr_track_is_seq_set(struct channel* current);
 
 struct mcast_conf;
 
