@@ -85,9 +85,10 @@ struct channel {
 	struct channel_ops	*ops;
 	void			*data;
 	
-	//uint32_t last_seq_sent;	/* last sequence number sent */
+	uint32_t last_seq_sent;	/* last sequence number sent */
 	uint32_t last_seq_recv;	/* last sequence number recv */
-	uint8_t local_seq_set;
+	uint8_t seq_set_sent : 1,
+			seq_set_recv : 1;
 };
 
 int channel_init(void);
@@ -126,6 +127,7 @@ void multichannel_close(struct multichannel *m);
 
 int multichannel_send_allbut(struct multichannel *m, const struct nethdr *net, struct channel* ex);
 int multichannel_reverse_allbut(struct multichannel *m, uint32_t length, struct channel* ex);
+int multichannel_seqfix_allbut(struct multichannel *m, uint32_t length, struct channel* ex);
 int multichannel_send(struct multichannel *c, const struct nethdr *net);
 int multichannel_send_flush(struct multichannel *c);
 int multichannel_recv(struct multichannel *c, char *buf, int size);

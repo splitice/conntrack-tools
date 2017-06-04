@@ -91,6 +91,14 @@ reverse_relay(struct channel *c, struct nethdr *net){
 	multichannel_reverse_allbut(STATE_SYNC(channel), net->len, c);
 }
 
+
+static void
+relay_seqfix(struct channel *c, struct nethdr *net){
+	if(!c->channel_relay_mode) return;
+	
+	multichannel_seqfix_allbut(STATE_SYNC(channel), net->len, c);
+}
+
 static void
 do_channel_handler_step(struct channel *c, struct nethdr *net, size_t remain)
 {

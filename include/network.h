@@ -41,6 +41,7 @@ int nethdr_size(int len);
 void nethdr_set(struct nethdr *net, int type);
 void nethdr_set_ack(struct nethdr *net);
 void nethdr_set_ctl(struct nethdr *net);
+void nethdr_set_seq(struct nethdr *net, struct channel* current);
 
 struct cache_object;
 int object_status_to_network_type(struct cache_object *obj);

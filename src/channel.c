@@ -98,7 +98,7 @@ channel_open(struct channel_conf *cfg)
 	if (c == NULL)
 		return NULL;
 
-	c->local_seq_set = 0;
+	c->seq_set_recv = c->seq_set_send = 0;
 	c->channel_type = cfg->channel_type;
 	c->channel_relay_mode = cfg->channel_relay_mode;
 

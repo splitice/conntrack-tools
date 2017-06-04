@@ -41,13 +41,16 @@ int nethdr_size(int len)
 	
 static inline void __nethdr_set(struct nethdr *net, int len)
 {
-	if (!seq_set) {
-		seq_set = 1;
-		cur_seq = time(NULL);
+	struct channel* current;
+	
+	current = STATE_SYNC(channel)->current;
+	if (!current->seq_set_sent) {
+		current->seq_set_sent = 1;
+		current->last_seq_sent = time(NULL);
 	}
 	net->version	= CONNTRACKD_PROTOCOL_VERSION;
 	net->len	= len;
-	net->seq	= cur_seq++;
+	net->seq	= current->last_seq_sent++;
 }
 
 void nethdr_set(struct nethdr *net, int type)
@@ -59,6 +62,10 @@ void nethdr_set(struct nethdr *net, int type)
 void nethdr_set_ack(struct nethdr *net)
 {
 	__nethdr_set(net, NETHDR_ACK_SIZ);
+}
+
+void nethdr_set_seq(struct nethdr *net, struct channel* current){
+	net->seq	= current->last_seq_sent++;
 }
 
 void nethdr_set_ctl(struct nethdr *net)
@@ -74,7 +81,7 @@ int nethdr_track_seq(uint32_t seq, uint32_t *exp_seq)
 	int ret = SEQ_UNKNOWN;
 
 	/* netlink sequence tracking initialization */
-	if (!STATE_SYNC(channel)->current->local_seq_set) {
+	if (!STATE_SYNC(channel)->current->seq_set_recv) {
 		ret = SEQ_UNSET;
 		goto out;
 	}
@@ -107,15 +114,18 @@ out:
 
 void nethdr_track_update_seq(uint32_t seq)
 {
-	if (!local_seq_set)
-		STATE_SYNC(channel)->current->local_seq_set = 1;
+	struct channel* current;
+	
+	current = STATE_SYNC(channel)->current;
+	if (!current->seq_set_recv)
+		current->seq_set_recv = 1;
 
-	STATE_SYNC(channel)->current->last_seq_recv = seq;
+	current->last_seq_recv = seq;
 }
 
 int nethdr_track_is_seq_set()
 {
-	return local_seq_set;
+	return seq_set_recv;
 }
 
 #include "cache.h"

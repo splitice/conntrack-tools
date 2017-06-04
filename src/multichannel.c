@@ -70,6 +70,19 @@ int multichannel_reverse_allbut(struct multichannel *m, uint32_t length, struct 
 	return ret;
 }
 
+int multichannel_seqfix_allbut(struct multichannel *m, uint32_t length, struct channel* ex)
+{
+	int ret = 0;
+	int i;
+	for (i = 0; i < m->channel_num; i++) {
+		if(m->channel[i] != ex){
+			struct nethdr* hdr = (struct nethdr*)(m->channel[i]->buffer->data - (length+sizeof(struct nethdr)));
+			nethdr_set_seq();
+		}
+	}
+	return ret;
+}
+
 int multichannel_send(struct multichannel *m, const struct nethdr *net)
 {
 	int ret = 0;
