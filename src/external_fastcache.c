@@ -87,9 +87,9 @@ static int slow_iterate(void *data1, void *n)
 
 static void do_gc_fast(struct alarm_block *a, void *data)
 {
-	uint32_t steps;
+	int steps;
 	
-	steps = cache_iterate_limit(external_fast, NULL, fast_previous, FAST_STEPS, fast_iterate);
+	steps = cache_iterate_limit(external_fast, NULL, fast_previous, FAST_STEPS, fast_iterate) - fast_previous;
 	if(steps != FAST_STEPS){
 		fast_previous = 0;
 	}else{
@@ -100,9 +100,9 @@ static void do_gc_fast(struct alarm_block *a, void *data)
 
 static void do_gc_slow(struct alarm_block *a, void *data)
 {
-	uint32_t steps;
+	int steps;
 	
-	steps = cache_iterate_limit(external, NULL, slow_previous, SLOW_STEPS, slow_iterate);
+	steps = cache_iterate_limit(external, NULL, slow_previous, SLOW_STEPS, slow_iterate) - slow_previous;
 	if(steps != SLOW_STEPS){
 		slow_previous = 0;
 	}else{
