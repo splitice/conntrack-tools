@@ -125,7 +125,7 @@ void nethdr_track_update_seq(uint32_t seq)
 
 int nethdr_track_is_seq_set()
 {
-	return seq_set_recv;
+	return STATE_SYNC(channel)->current->seq_set_recv;
 }
 
 #include "cache.h"
