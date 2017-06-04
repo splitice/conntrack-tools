@@ -62,7 +62,6 @@ static int fast_iterate(void *data1, void *n)
 	
 	if(time_cached() > (obj->lifetime + 300))
 	{
-		puts("Elevating fast connection\n");
 		id = hashtable_hash(external->h, obj->ptr);
 		cache_del(external_fast, obj);
 		cache_add(external, obj, id);
@@ -77,7 +76,6 @@ static int slow_iterate(void *data1, void *n)
 
 	if(time_cached() > (obj->lastupdate + 21600))//30 minutes
 	{
-		puts("Clearing slow connection\n");
 		cache_del(external, obj);
 		cache_object_free(obj);
 	}
@@ -210,7 +208,6 @@ static int external_cache_ct_del(struct nf_conntrack *ct)
 		if(obj->owner != STATE_SYNC(channel)->current){
 			return 0;
 		}
-		puts("Deleting fast connection");
 		cache_del(external_fast, obj);
 		cache_object_free(obj);
 		return 1;
@@ -221,7 +218,6 @@ static int external_cache_ct_del(struct nf_conntrack *ct)
 		if(obj->owner != STATE_SYNC(channel)->current){
 			return 0;
 		}
-		puts("Deleting slow connection");
 		cache_del(external, obj);
 		cache_object_free(obj);
 		return 1;
