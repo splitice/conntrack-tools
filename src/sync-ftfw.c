@@ -136,9 +136,10 @@ static void do_alive_alarm(struct alarm_block *a, void *data)
 {
 	if (ack_from_set && nethdr_track_is_seq_set()) {
 		/* exp_seq contains the last update received */
+		//TODO: do all channels?
 		tx_queue_add_ctlmsg(NET_F_ACK,
 				    ack_from,
-				    STATE_SYNC(last_seq_recv));
+				    STATE_SYNC(channel)->current->last_seq_recv);
 		ack_from_set = 0;
 	} else
 		tx_queue_add_ctlmsg2(NET_F_ALIVE);
