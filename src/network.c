@@ -39,8 +39,11 @@ int nethdr_size(int len)
 	return NETHDR_SIZ + len;
 }
 	
-static inline void __nethdr_set(struct nethdr *net, struct channel* current, int len)
+static inline void __nethdr_set(struct nethdr *net, int len)
 {
+	struct channel* current;
+	
+	current = STATE_SYNC(channel)->current;
 	if (!current->seq_set_sent) {
 		current->seq_set_sent = 1;
 		current->last_seq_sent = time(NULL);
@@ -52,45 +55,45 @@ static inline void __nethdr_set(struct nethdr *net, struct channel* current, int
 
 void nethdr_set(struct nethdr *net, struct channel* current, int type)
 {
-	__nethdr_set(net, current, NETHDR_SIZ);
+	__nethdr_set(net, NETHDR_SIZ);
 	net->type = type;
 }
 
 void nethdr_set_ack(struct nethdr *net, struct channel* current)
 {
-	__nethdr_set(net, current, NETHDR_ACK_SIZ);
+	__nethdr_set(net, NETHDR_ACK_SIZ);
 }
 
 void nethdr_set_seq(struct nethdr *net, struct channel* current){
 	net->seq	= htons(current->last_seq_sent++);
 }
 
-void nethdr_set_ctl(struct nethdr *net, struct channel* current)
+void nethdr_set_ctl(struct nethdr *net)
 {
-	__nethdr_set(net, current, NETHDR_SIZ);
+	__nethdr_set(net, NETHDR_SIZ);
 }
 
 static int local_seq_set = 0;
 
 /* this function only tracks, it does not update the last sequence received */
-int nethdr_track_seq(uint32_t seq, uint32_t *exp_seq, struct channel* current)
+int nethdr_track_seq(uint32_t seq, uint32_t *exp_seq)
 {
 	int ret = SEQ_UNKNOWN;
 
 	/* netlink sequence tracking initialization */
-	if (!current->seq_set_recv) {
+	if (!STATE_SYNC(channel)->current->seq_set_recv) {
 		ret = SEQ_UNSET;
 		goto out;
 	}
 
 	/* fast path: we received the correct sequence */
-	if (seq == current->last_seq_recv+1) {
+	if (seq == STATE_SYNC(channel)->current->last_seq_recv+1) {
 		ret = SEQ_IN_SYNC;
 		goto out;
 	}
 
 	/* out of sequence: some messages got lost */	
-	if (after(seq, current->last_seq_recv+1)) {
+	if (after(seq, STATE_SYNC(channel)->current->last_seq_recv+1)) {
 		STATE_SYNC(error).msg_rcv_lost +=
 					seq - STATE_SYNC(channel)->current->last_seq_recv + 1;
 		ret = SEQ_AFTER;
@@ -98,30 +101,31 @@ int nethdr_track_seq(uint32_t seq, uint32_t *exp_seq, struct channel* current)
 	}
 
 	/* out of sequence: replayed/delayed packet? */
-	if (before(seq, current->last_seq_recv+1)) {
+	if (before(seq, STATE_SYNC(channel)->current->last_seq_recv+1)) {
 		STATE_SYNC(error).msg_rcv_before++;
 		ret = SEQ_BEFORE;
 	}
 
 out:
-	*exp_seq = current->last_seq_recv+1;
+	*exp_seq = STATE_SYNC(channel)->current->last_seq_recv+1;
 
 	return ret;
 }
 
-void nethdr_track_update_seq(uint32_t seq, struct channel* current)
+void nethdr_track_update_seq(uint32_t seq)
 {
 	struct channel* current;
 	
+	current = STATE_SYNC(channel)->current;
 	if (!current->seq_set_recv)
 		current->seq_set_recv = 1;
 
 	current->last_seq_recv = seq;
 }
 
-int nethdr_track_is_seq_set(struct channel* current)
+int nethdr_track_is_seq_set()
 {
-	return current->seq_set_recv;
+	return STATE_SYNC(channel)->current->seq_set_recv;
 }
 
 #include "cache.h"
