@@ -117,7 +117,6 @@ do_channel_handler_step(struct channel *c, struct nethdr *net, size_t remain)
 		// Relay to all
 		if(net->type <= NET_T_STATE_MAX) {
 			handle_relay(c, net);
-			len = net->len;
 		}
 	}
 
@@ -164,7 +163,7 @@ do_channel_handler_step(struct channel *c, struct nethdr *net, size_t remain)
 		if (ct == NULL)
 			goto reverse_relay;
 		if(!STATE_SYNC(external)->ct.del(ct)){
-			reverse_relay(c, len);
+			reverse_relay(c, net->len);
 			goto end;
 		}
 		break;
@@ -192,7 +191,7 @@ do_channel_handler_step(struct channel *c, struct nethdr *net, size_t remain)
 		break;
 	}
 	
-	relay_seqfix(c,len);
+	relay_seqfix(c,net->len);
 	
 end:
 	if (ct != NULL)
@@ -204,7 +203,7 @@ end:
 	return;
 	
 reverse_relay:
-	reverse_relay(c, len);
+	reverse_relay(c, net->len);
 }
 
 static char __net[65536];		/* XXX: maximum MTU for IPv4 */
