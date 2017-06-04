@@ -125,7 +125,6 @@ do_channel_handler_step(struct channel *c, struct nethdr *net, size_t remain)
 	multichannel_change_current_channel(STATE_SYNC(channel), c);
 	
 	switch (STATE_SYNC(sync)->recv(net)) {
-	case MSG_DATA:
 	case MSG_CTL:
 		return;
 	case MSG_BAD:
