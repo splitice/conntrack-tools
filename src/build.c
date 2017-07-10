@@ -120,11 +120,10 @@ static void build_l4proto_tcp(const struct nf_conntrack *ct, struct nethdr *n)
 		      sizeof(struct nfct_attr_grp_port));
 			  
 	if (!nfct_attr_is_set(ct, ATTR_TCP_STATE)){
-		uint8_t *ptr = put_header(n, NTA_TCP_STATE, sizeof(uint8_t));
-		*ptr = TCP_CONNTRACK_SYN_SENT;
-	}else{	
-		ct_build_u8(ct, ATTR_TCP_STATE, n, NTA_TCP_STATE);
+		return
 	}
+	
+	ct_build_u8(ct, ATTR_TCP_STATE, n, NTA_TCP_STATE);
 	
 	if (CONFIG(sync).tcp_window_tracking) {
 		ct_build_u8(ct, ATTR_TCP_WSCALE_ORIG, n, NTA_TCP_WSCALE_ORIG);
