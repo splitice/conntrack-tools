@@ -120,7 +120,7 @@ static void build_l4proto_tcp(const struct nf_conntrack *ct, struct nethdr *n)
 		      sizeof(struct nfct_attr_grp_port));
 			  
 	if (!nfct_attr_is_set(ct, ATTR_TCP_STATE)){
-		return
+		return;
 	}
 	
 	ct_build_u8(ct, ATTR_TCP_STATE, n, NTA_TCP_STATE);
