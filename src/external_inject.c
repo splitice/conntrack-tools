@@ -25,6 +25,7 @@
 #include "netlink.h"
 
 #include <libnetfilter_conntrack/libnetfilter_conntrack.h>
+#include <libnetfilter_conntrack/libnetfilter_conntrack_tcp.h>
 #include <errno.h>
 #include <stdlib.h>
 
@@ -60,11 +61,21 @@ static void external_inject_close(void)
 	nfct_close(inject);
 }
 
+static void tcp_create(struct nf_conntrack *ct)
+{
+	uint8_t l4proto = nfct_get_attr_u8(ct, ATTR_L4PROTO);
+	if(l4proto != IPPROTO_TCP) return;
+	if (!nfct_attr_is_set(ct, ATTR_TCP_STATE)){
+		nfct_set_attr_u8(ct, TCP_CONNTRACK_SYN_SENT, *value);
+	}
+}
+
 static void external_inject_ct_new(struct nf_conntrack *ct)
 {
 	int ret, retry = 1;
 
 retry:
+	tcp_create(ct);
 	if (nl_create_conntrack(inject, ct, CONFIG(commit_timeout)) == -1) {
 		/* if the state entry exists, we delete and try again */
 		if (errno == EEXIST && retry == 1) {
@@ -100,6 +111,7 @@ static void external_inject_ct_upd(struct nf_conntrack *ct)
 
 	/* state entries does not exist, we have to create it */
 	if (errno == ENOENT) {
+		tcp_create(ct);
 		if (nl_create_conntrack(inject, ct, CONFIG(commit_timeout)) == -1) {
 			external_inject_stat.upd_fail++;
 			dlog(LOG_ERR, "inject-upd1: %s", strerror(errno));
