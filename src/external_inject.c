@@ -66,7 +66,7 @@ static void tcp_create(struct nf_conntrack *ct)
 	uint8_t l4proto = nfct_get_attr_u8(ct, ATTR_L4PROTO);
 	if(l4proto != IPPROTO_TCP) return;
 	if (!nfct_attr_is_set(ct, ATTR_TCP_STATE)){
-		nfct_set_attr_u8(ct, TCP_CONNTRACK_SYN_SENT, *value);
+		nfct_set_attr_u8(ct, ATTR_TCP_STATE, TCP_CONNTRACK_SYN_SENT);
 	}
 }
 
