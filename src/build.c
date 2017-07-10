@@ -21,6 +21,7 @@
 #include <libnetfilter_conntrack/libnetfilter_conntrack.h>
 #include "network.h"
 #include "conntrackd.h"
+#include <libnetfilter_conntrack/libnetfilter_conntrack_tcp.h>
 
 static inline void *
 put_header(struct nethdr *n, int attr, size_t len)
