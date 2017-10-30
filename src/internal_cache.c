@@ -114,6 +114,8 @@ internal_cache_ct_resync(enum nf_conntrack_msg_type type,
 {
 	struct cache_object *obj;
 	int id;
+	uint32_t timeout;
+	float diff;
 
 	if (ct_filter_conntrack(ct, 1))
 		return NFCT_CB_CONTINUE;
@@ -122,8 +124,17 @@ internal_cache_ct_resync(enum nf_conntrack_msg_type type,
 	if (obj) {
 		if (obj->status != C_OBJ_DEAD) {
 			if (nfct_attr_is_set(obj->ptr, ATTR_TIMEOUT)){
-				if(time_cached() < (obj->lastupdate + nfct_get_attr_u32(obj->ptr, ATTR_TIMEOUT) - 120)){
+				timeout = nfct_get_attr_u32(obj->ptr, ATTR_TIMEOUT);
+				if(time_cached() < (obj->lastupdate + timeout - 90)){
 					return NFCT_CB_CONTINUE;
+				}
+				
+				
+				if (nfct_attr_is_set(ct, ATTR_TIMEOUT)){
+					diff = (float)(nfct_get_attr_u32(ct, ATTR_TIMEOUT) + time_cached()) - (obj->lastupdate + timeout);
+					if(diff > -2 && diff < 2){
+						return NFCT_CB_CONTINUE;
+					}
 				}
 			}
 		}
@@ -146,7 +157,7 @@ internal_cache_ct_resync(enum nf_conntrack_msg_type type,
 		sync_send(obj, NET_T_STATE_CT_NEW);
 		break;
 	case C_OBJ_ALIVE:
-					dlog(LOG_ERR, "upd");
+					dlog(LOG_ERR, "u");
 		sync_send(obj, NET_T_STATE_CT_UPD);
 		break;
 	}
