@@ -164,8 +164,8 @@ internal_cache_ct_resync(enum nf_conntrack_msg_type type,
 	case C_OBJ_ALIVE:
 		/* Light weight resync */
 		obj2 = cache_ct_alloc();
-		if(obj2 != NULL && nfct_attr_is_set(ct, ATTR_TIMEOUT)){
-			cache_ct_copy(obj2, ct, NFCT_CP_ORIG | NFCT_CP_REPL);
+		if(false && obj2 != NULL && nfct_attr_is_set(ct, ATTR_TIMEOUT)){
+			cache_ct_copy(obj2, obj->ptr, NFCT_CP_ORIG | NFCT_CP_REPL);
 			
 			l4proto = nfct_get_attr_u8(ct, ATTR_L4PROTO);
 			if (l4proto == IPPROTO_TCP && nfct_attr_is_set(ct, ATTR_TCP_STATE)){
@@ -176,8 +176,10 @@ internal_cache_ct_resync(enum nf_conntrack_msg_type type,
 			sync_send(obj2, NET_T_STATE_CT_UPD);
 			cache_ct_free(obj2);
 		}else{
-			sync_send(ct, NET_T_STATE_CT_UPD);
+			ct = obj->ptr;
 		}
+		sync_send(obj2, NET_T_STATE_CT_UPD);
+		
 		break;
 	}
 	return NFCT_CB_CONTINUE;
