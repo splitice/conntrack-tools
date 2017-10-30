@@ -15,7 +15,7 @@
 #include "network.h"
 #include "origin.h"
 
-static inline void sync_send(void *ptr, int query)
+static void sync_send(void *ptr, int query)
 {
 	struct nethdr *net;
 
