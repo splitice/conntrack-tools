@@ -176,7 +176,7 @@ internal_cache_ct_resync(enum nf_conntrack_msg_type type,
 			sync_send(obj2, NET_T_STATE_CT_UPD);
 			cache_ct_free(obj2);
 		}else{
-			sync_send(obj->ptr, NET_T_STATE_CT_UPD);
+			sync_send(ct, NET_T_STATE_CT_UPD);
 		}
 		break;
 	}
