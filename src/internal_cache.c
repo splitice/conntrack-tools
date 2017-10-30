@@ -124,6 +124,7 @@ internal_cache_ct_resync(enum nf_conntrack_msg_type type,
 	int id;
 	uint32_t timeout;
 	float diff;
+	uint8_t l4proto;
 
 	if (ct_filter_conntrack(ct, 1))
 		return NFCT_CB_CONTINUE;
@@ -164,7 +165,13 @@ internal_cache_ct_resync(enum nf_conntrack_msg_type type,
 		/* Light weight resync */
 		obj2 = cache_ct_alloc();
 		if(obj2 != NULL && nfct_attr_is_set(ct, ATTR_TIMEOUT)){
-			cache_ct_copy(obj2, obj, NFCT_CP_ORIG | NFCT_CP_REPL);
+			cache_ct_copy(obj2, ct, NFCT_CP_ORIG | NFCT_CP_REPL);
+			
+			l4proto = nfct_get_attr_u8(ct, ATTR_L4PROTO);
+			if (l4proto == IPPROTO_TCP && nfct_attr_is_set(ct, ATTR_TCP_STATE)){
+				nfct_set_attr_u8(obj2, ATTR_TCP_STATE, nfct_get_attr_u8(ct, ATTR_TCP_STATE));
+			}
+	
 			nfct_set_attr_u32(obj2, ATTR_TIMEOUT, nfct_get_attr_u32(ct, ATTR_TIMEOUT));
 			sync_send(obj2, NET_T_STATE_CT_UPD);
 			cache_ct_free(obj2);
