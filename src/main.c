@@ -303,10 +303,6 @@ int main(int argc, char *argv[])
 				action = STATS;
 			}
 			break;
-		case 'S':
-			fprintf(stderr, "WARNING: -S option is obsolete. "
-					"Ignoring.\n");
-			break;
 		case 'n':
 			set_operation_mode(&type, REQUEST, argv);
 			action = REQUEST_DUMP;
