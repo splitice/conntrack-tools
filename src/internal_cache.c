@@ -125,22 +125,23 @@ internal_cache_ct_resync(enum nf_conntrack_msg_type type,
 		return NFCT_CB_CONTINUE;
 	
 	obj = cache_find(STATE(mode)->internal->ct.data, ct, &id);
-	if (obj) {
-		if (obj->status != C_OBJ_DEAD) {
-			if (nfct_attr_is_set(obj->ptr, ATTR_TIMEOUT)){
-				timeout = nfct_get_attr_u32(obj->ptr, ATTR_TIMEOUT);
-				if(time_cached() < (obj->lastupdate + timeout - 90)){
+	if (obj && obj->status != C_OBJ_DEAD) {
+		if (nfct_attr_is_set(obj->ptr, ATTR_TIMEOUT)){
+			timeout = nfct_get_attr_u32(obj->ptr, ATTR_TIMEOUT);
+			/* If more than 90 seconds remain */
+			if(time_cached() < (obj->lastupdate + timeout - 90)){
+				return NFCT_CB_CONTINUE;
+			}
+			
+			if (nfct_attr_is_set(ct, ATTR_TIMEOUT)){
+				diff = (float)(nfct_get_attr_u32(ct, ATTR_TIMEOUT) + time_cached()) - (obj->lastupdate + timeout);
+				if(diff > -4 && diff < 4){
 					return NFCT_CB_CONTINUE;
 				}
-				
-				if (nfct_attr_is_set(ct, ATTR_TIMEOUT)){
-					diff = (float)(nfct_get_attr_u32(ct, ATTR_TIMEOUT) + time_cached()) - (obj->lastupdate + timeout);
-					if(diff > -2 && diff < 2){
-						return NFCT_CB_CONTINUE;
-					}
-				}
-			}
+			}	
 		}
+	}else{
+		return NFCT_CB_CONTINUE;/* it probably didn't come from us */
 	}
 
 	/* This is required by kernels < 2.6.20 */
@@ -150,7 +151,7 @@ internal_cache_ct_resync(enum nf_conntrack_msg_type type,
 	nfct_attr_unset(ct, ATTR_REPL_COUNTER_PACKETS);
 	nfct_attr_unset(ct, ATTR_USE);
 
-	obj = cache_update_force(STATE(mode)->internal->ct.data, ct);
+	obj = cache_update(STATE(mode)->internal->ct.data, obj, id, ct);
 	if (obj == NULL)
 		return NFCT_CB_CONTINUE;
 
