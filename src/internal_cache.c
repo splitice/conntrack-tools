@@ -164,7 +164,7 @@ internal_cache_ct_resync(enum nf_conntrack_msg_type type,
 	case C_OBJ_ALIVE:
 		/* Light weight resync */
 		obj2 = cache_ct_alloc();
-		if(false && obj2 != NULL && nfct_attr_is_set(ct, ATTR_TIMEOUT)){
+		if(0 && obj2 != NULL && nfct_attr_is_set(ct, ATTR_TIMEOUT)){
 			cache_ct_copy(obj2, obj->ptr, NFCT_CP_ORIG | NFCT_CP_REPL);
 			
 			l4proto = nfct_get_attr_u8(ct, ATTR_L4PROTO);
