@@ -93,7 +93,7 @@ static int do_cache_to_tx_exp(void *data1, void *data2)
 	
 	
 	if (nfct_attr_is_set(obj->ptr, ATTR_TIMEOUT)){
-		if(nfct_get_attr_u32(ct, ATTR_TIMEOUT) > 90){
+		if(nfct_get_attr_u32(obj->ptr, ATTR_TIMEOUT) > 90){
 			return 0;
 		}
 	}
