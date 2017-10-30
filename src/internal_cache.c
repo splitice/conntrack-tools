@@ -151,9 +151,7 @@ internal_cache_ct_resync(enum nf_conntrack_msg_type type,
 	nfct_attr_unset(ct, ATTR_REPL_COUNTER_PACKETS);
 	nfct_attr_unset(ct, ATTR_USE);
 
-	obj = cache_update(STATE(mode)->internal->ct.data, obj, id, ct);
-	if (obj == NULL)
-		return NFCT_CB_CONTINUE;
+	cache_update(STATE(mode)->internal->ct.data, obj, id, ct);
 
 	switch (obj->status) {
 	case C_OBJ_NEW:
