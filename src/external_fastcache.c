@@ -70,7 +70,7 @@ static int slow_iterate(void *data1, void *n)
 {
 	struct cache_object *obj = n;
 
-	if(time_cached() > (obj->lastupdate + 21600))//30 minutes
+	if(time_cached() > (obj->lastupdate + 600))//10 minutes
 	{
 		cache_del(external, obj);
 		cache_object_free(obj);
