@@ -50,17 +50,13 @@ static int fast_iterate(void *data1, void *n)
 	}
 	
 	//TODO: actively query liveness?
-	/*if(time_cached() > (obj->lastupdate + 180))
+	if(time_cached() > (obj->lastupdate + 250))
 	{
 		puts("Clearing fast connection\n");
 		cache_del(external_fast, obj);
 		cache_object_free(obj);
-	}
-	else */
-	
-	//TODO: check for mark or DNAT
-	
-	if(time_cached() > (obj->lifetime + 300))
+	} 
+	else if(time_cached() > (obj->lifetime + 300))
 	{
 		id = hashtable_hash(external->h, obj->ptr);
 		cache_del(external_fast, obj);
