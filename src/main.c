@@ -365,13 +365,13 @@ int main(int argc, char *argv[])
 	/*
 	 * lock file
 	 */
-	ret = open(CONFIG(lockfile), O_CREAT | O_EXCL | O_TRUNC, 0600);
+	/*ret = open(CONFIG(lockfile), O_CREAT | O_EXCL | O_TRUNC, 0600);
 	if (ret == -1) {
 		fprintf(stderr, "lockfile `%s' exists, perhaps conntrackd "
 			        "already running?\n", CONFIG(lockfile));
 		exit(EXIT_FAILURE);
 	}
-	close(ret);
+	close(ret);*/
 
 	/*
 	 * Setting process priority and scheduler
