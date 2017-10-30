@@ -49,6 +49,7 @@
 #define ALL_COMMIT		46	/* commit all tables		*/
 #define EXP_DUMP_INT_XML	47	/* dump internal cache in XML	*/
 #define EXP_DUMP_EXT_XML	48	/* dump external cache in XML	*/
+#define SEND_BULKEXP		49	/* send a bulk			*/
 
 #define DEFAULT_CONFIGFILE	"/etc/conntrackd/conntrackd.conf"
 #define DEFAULT_LOCKFILE	"/var/lock/conntrackd.lock"

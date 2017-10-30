@@ -85,6 +85,24 @@ static int do_cache_to_tx(void *data1, void *data2)
 	return 0;
 }
 
+
+static int do_cache_to_tx_exp(void *data1, void *data2)
+{
+	struct cache_object *obj = data2;
+	struct cache_notrack *cn = cache_get_extra(obj);
+	
+	
+	if (nfct_attr_is_set(obj->ptr, ATTR_TIMEOUT)){
+		if(nfct_get_attr_u32(ct, ATTR_TIMEOUT) > 90){
+			return 0;
+		}
+	}
+	
+	if (queue_add(STATE_SYNC(tx_queue), &cn->qnode) > 0)
+		cache_object_get(obj);
+	return 0;
+}
+
 static int kernel_resync_cb(enum nf_conntrack_msg_type type,
 			    struct nf_conntrack *ct, void *data)
 {
@@ -134,6 +152,17 @@ static int notrack_local(int fd, int type, void *data)
 				      NULL, do_cache_to_tx);
 			cache_iterate(STATE(mode)->internal->exp.data,
 				      NULL, do_cache_to_tx);
+		}
+		break;
+	case SEND_BULKEXP:
+		dlog(LOG_NOTICE, "sending bulk update");
+		if (CONFIG(sync).internal_cache_disable) {
+			kernel_resync();
+		} else {
+			cache_iterate(STATE(mode)->internal->ct.data,
+				      NULL, do_cache_to_tx_exp);
+			cache_iterate(STATE(mode)->internal->exp.data,
+				      NULL, do_cache_to_tx_exp);
 		}
 		break;
 	default:
