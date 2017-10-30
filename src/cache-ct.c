@@ -105,12 +105,12 @@ static int cache_ct_cmp(const void *data1, const void *data2)
 	       cache_ct_cmp_id(obj->ptr, ct);
 }
 
-static void *cache_ct_alloc(void)
+void *cache_ct_alloc(void)
 {
 	return nfct_new();
 }
 
-static void cache_ct_free(void *ptr)
+void cache_ct_free(void *ptr)
 {
 	nfct_destroy(ptr);
 }

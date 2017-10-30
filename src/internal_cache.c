@@ -113,6 +113,8 @@ static void internal_cache_ct_purge(void)
 }
 
 void cache_ct_copy(void *dst, void *src, unsigned int flags);
+void *cache_ct_alloc(void);
+void cache_ct_free(void *ptr);
 
 static int
 internal_cache_ct_resync(enum nf_conntrack_msg_type type,
