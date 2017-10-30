@@ -15,13 +15,12 @@
 #include "network.h"
 #include "origin.h"
 
-static inline void sync_send(struct cache_object *obj, int query)
+static inline void sync_send(void *ptr, int query)
 {
 	struct nethdr *net;
 
-	net = BUILD_NETMSG_FROM_CT(obj->ptr, NET_T_STATE_CT_NEW);
+	net = BUILD_NETMSG_FROM_CT(ptr, NET_T_STATE_CT_NEW);
 	multichannel_send(STATE_SYNC(channel), net);
-	//STATE_SYNC(sync)->enqueue(obj, query);
 }
 
 static int internal_cache_init(void)
@@ -98,7 +97,7 @@ static int internal_cache_ct_purge_step(void *data1, void *data2)
 	if (!STATE(get_retval)) {
 		if (obj->status != C_OBJ_DEAD) {
 			cache_object_set_status(obj, C_OBJ_DEAD);
-			sync_send(obj, NET_T_STATE_CT_DEL);
+			sync_send(obj->ptr, NET_T_STATE_CT_DEL);
 			cache_object_put(obj);
 		}
 	}
@@ -120,7 +119,8 @@ static int
 internal_cache_ct_resync(enum nf_conntrack_msg_type type,
 			 struct nf_conntrack *ct, void *data)
 {
-	struct cache_object *obj, *obj2;
+	struct cache_object *obj;
+	void* obj2;
 	int id;
 	uint32_t timeout;
 	float diff;
@@ -158,7 +158,7 @@ internal_cache_ct_resync(enum nf_conntrack_msg_type type,
 
 	switch (obj->status) {
 	case C_OBJ_NEW:
-		sync_send(obj, NET_T_STATE_CT_NEW);
+		sync_send(obj->ptr, NET_T_STATE_CT_NEW);
 		break;
 	case C_OBJ_ALIVE:
 		/* Light weight resync */
@@ -168,7 +168,7 @@ internal_cache_ct_resync(enum nf_conntrack_msg_type type,
 			sync_send(obj2, NET_T_STATE_CT_UPD);
 			cache_ct_free(obj2);
 		}else{
-			sync_send(obj, NET_T_STATE_CT_UPD);
+			sync_send(obj->ptr, NET_T_STATE_CT_UPD);
 		}
 		break;
 	}
@@ -204,7 +204,7 @@ retry:
 		 * processes or the kernel, but don't propagate events that
 		 * have been triggered by conntrackd itself, eg. commits. */
 		if (origin == CTD_ORIGIN_NOT_ME)
-			sync_send(obj, NET_T_STATE_CT_NEW);
+			sync_send(obj->ptr, NET_T_STATE_CT_NEW);
 	} else {
 		cache_del(STATE(mode)->internal->ct.data, obj);
 		cache_object_free(obj);
@@ -225,7 +225,7 @@ static void internal_cache_ct_event_upd(struct nf_conntrack *ct, int origin)
 		return;
 
 	if (origin == CTD_ORIGIN_NOT_ME)
-		sync_send(obj, NET_T_STATE_CT_UPD);
+		sync_send(obj->ptr, NET_T_STATE_CT_UPD);
 }
 
 static int internal_cache_ct_event_del(struct nf_conntrack *ct, int origin)
@@ -245,7 +245,7 @@ static int internal_cache_ct_event_del(struct nf_conntrack *ct, int origin)
 	if (obj->status != C_OBJ_DEAD) {
 		cache_object_set_status(obj, C_OBJ_DEAD);
 		if (origin == CTD_ORIGIN_NOT_ME) {
-			sync_send(obj, NET_T_STATE_CT_DEL);
+			sync_send(obj->ptr, NET_T_STATE_CT_DEL);
 		}
 		cache_object_put(obj);
 	}
@@ -286,7 +286,7 @@ static int internal_cache_exp_purge_step(void *data1, void *data2)
 	if (!STATE(get_retval)) {
 		if (obj->status != C_OBJ_DEAD) {
 			cache_object_set_status(obj, C_OBJ_DEAD);
-			sync_send(obj, NET_T_STATE_EXP_DEL);
+			sync_send(obj->ptr, NET_T_STATE_EXP_DEL);
 			cache_object_put(obj);
 		}
 	}
@@ -320,10 +320,10 @@ internal_cache_exp_resync(enum nf_conntrack_msg_type type,
 
 	switch (obj->status) {
 	case C_OBJ_NEW:
-		sync_send(obj, NET_T_STATE_EXP_NEW);
+		sync_send(obj->ptr, NET_T_STATE_EXP_NEW);
 		break;
 	case C_OBJ_ALIVE:
-		sync_send(obj, NET_T_STATE_EXP_UPD);
+		sync_send(obj->ptr, NET_T_STATE_EXP_UPD);
 		break;
 	}
 	return NFCT_CB_CONTINUE;
@@ -352,7 +352,7 @@ retry:
 		 * processes or the kernel, but don't propagate events that
 		 * have been triggered by conntrackd itself, eg. commits. */
 		if (origin == CTD_ORIGIN_NOT_ME)
-			sync_send(obj, NET_T_STATE_EXP_NEW);
+			sync_send(obj->ptr, NET_T_STATE_EXP_NEW);
 	} else {
 		cache_del(STATE(mode)->internal->exp.data, obj);
 		cache_object_free(obj);
@@ -373,7 +373,7 @@ static void internal_cache_exp_event_upd(struct nf_expect *exp, int origin)
 		return;
 
 	if (origin == CTD_ORIGIN_NOT_ME)
-		sync_send(obj, NET_T_STATE_EXP_UPD);
+		sync_send(obj->ptr, NET_T_STATE_EXP_UPD);
 }
 
 static int internal_cache_exp_event_del(struct nf_expect *exp, int origin)
@@ -393,7 +393,7 @@ static int internal_cache_exp_event_del(struct nf_expect *exp, int origin)
 	if (obj->status != C_OBJ_DEAD) {
 		cache_object_set_status(obj, C_OBJ_DEAD);
 		if (origin == CTD_ORIGIN_NOT_ME) {
-			sync_send(obj, NET_T_STATE_EXP_DEL);
+			sync_send(obj->ptr, NET_T_STATE_EXP_DEL);
 		}
 		cache_object_put(obj);
 	}
