@@ -122,8 +122,7 @@ internal_cache_ct_resync(enum nf_conntrack_msg_type type,
 	if (obj) {
 		if (obj->status != C_OBJ_DEAD) {
 			if (nfct_attr_is_set(obj->ptr, ATTR_TIMEOUT)){
-				if(time_cached() > (obj->lastupdate + nfct_get_attr_u32(obj->ptr, ATTR_TIMEOUT) - 120)){
-					dlog(LOG_ERR, "skipping");
+				if(time_cached() < (obj->lastupdate + nfct_get_attr_u32(obj->ptr, ATTR_TIMEOUT) - 120)){
 					return NFCT_CB_CONTINUE;
 				}
 			}
@@ -143,9 +142,11 @@ internal_cache_ct_resync(enum nf_conntrack_msg_type type,
 
 	switch (obj->status) {
 	case C_OBJ_NEW:
+					dlog(LOG_ERR, "new");
 		sync_send(obj, NET_T_STATE_CT_NEW);
 		break;
 	case C_OBJ_ALIVE:
+					dlog(LOG_ERR, "upd");
 		sync_send(obj, NET_T_STATE_CT_UPD);
 		break;
 	}
