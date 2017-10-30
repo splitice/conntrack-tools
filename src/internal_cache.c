@@ -165,20 +165,21 @@ internal_cache_ct_resync(enum nf_conntrack_msg_type type,
 		/* Light weight resync */
 		obj2 = cache_ct_alloc();
 		if(0 && obj2 != NULL && nfct_attr_is_set(ct, ATTR_TIMEOUT)){
-			cache_ct_copy(obj2, obj->ptr, NFCT_CP_ORIG | NFCT_CP_REPL);
+			cache_ct_copy(obj2, obj->ptr, NFCT_CP_ORIG);
 			
 			l4proto = nfct_get_attr_u8(ct, ATTR_L4PROTO);
 			if (l4proto == IPPROTO_TCP && nfct_attr_is_set(ct, ATTR_TCP_STATE)){
 				nfct_set_attr_u8(obj2, ATTR_TCP_STATE, nfct_get_attr_u8(ct, ATTR_TCP_STATE));
 			}
 	
-			nfct_set_attr_u32(obj2, ATTR_TIMEOUT, nfct_get_attr_u32(ct, ATTR_TIMEOUT));
+			nfct_set_attr_u32(obj2, ATTR_TIMEOUT, nfct_attr_is_set(ct, ATTR_TIMEOUT) ? nfct_get_attr_u32(ct, ATTR_TIMEOUT) : 180);
+			
 			sync_send(obj2, NET_T_STATE_CT_UPD);
 			cache_ct_free(obj2);
 		}else{
-			obj2 = obj->ptr;
+			sync_send(ct, NET_T_STATE_CT_UPD);
 		}
-		sync_send(obj2, NET_T_STATE_CT_UPD);
+		
 		
 		break;
 	}
