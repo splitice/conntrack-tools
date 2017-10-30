@@ -116,6 +116,18 @@ internal_cache_ct_resync(enum nf_conntrack_msg_type type,
 
 	if (ct_filter_conntrack(ct, 1))
 		return NFCT_CB_CONTINUE;
+	
+	obj = cache_find(c, ptr, &id);
+	if (obj) {
+		if (obj->status != C_OBJ_DEAD) {
+			if (nfct_attr_is_set(obj->ptr, ATTR_TIMEOUT)){
+				if(time_cached() > (obj->lastupdate + nfct_get_attr_u32(obj->ptr, ATTR_TIMEOUT) - 120)){
+					dlog(LOG_ERR, "skipping");
+					return NFCT_CB_CONTINUE;
+				}
+			}
+		}
+	}
 
 	/* This is required by kernels < 2.6.20 */
 	nfct_attr_unset(ct, ATTR_ORIG_COUNTER_BYTES);

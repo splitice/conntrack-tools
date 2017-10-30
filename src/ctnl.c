@@ -77,7 +77,7 @@ static void local_resync_master(void)
 	if (STATE(mode)->internal->flags & INTERNAL_F_POPULATE) {
 		STATE(stats).nl_kernel_table_resync++;
 		dlog(LOG_NOTICE, "resync with master conntrack table");
-		nl_dump_conntrack_table(STATE(dump));
+		nl_dump_conntrack_table(STATE(resync));
 	} else {
 		dlog(LOG_NOTICE, "resync is unsupported in this mode");
 	}
