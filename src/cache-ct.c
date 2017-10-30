@@ -115,7 +115,7 @@ static void cache_ct_free(void *ptr)
 	nfct_destroy(ptr);
 }
 
-static void cache_ct_copy(void *dst, void *src, unsigned int flags)
+void cache_ct_copy(void *dst, void *src, unsigned int flags)
 {
 	nfct_copy(dst, src, flags);
 }

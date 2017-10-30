@@ -112,6 +112,8 @@ static void internal_cache_ct_purge(void)
 			internal_cache_ct_purge_step);
 }
 
+void cache_ct_copy(void *dst, void *src, unsigned int flags);
+
 static int
 internal_cache_ct_resync(enum nf_conntrack_msg_type type,
 			 struct nf_conntrack *ct, void *data)
