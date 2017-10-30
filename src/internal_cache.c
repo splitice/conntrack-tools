@@ -17,7 +17,11 @@
 
 static inline void sync_send(struct cache_object *obj, int query)
 {
-	STATE_SYNC(sync)->enqueue(obj, query);
+	struct nethdr *net;
+
+	net = BUILD_NETMSG_FROM_CT(obj->ptr, NET_T_STATE_CT_NEW);
+	multichannel_send(STATE_SYNC(channel), net);
+	//STATE_SYNC(sync)->enqueue(obj, query);
 }
 
 static int internal_cache_init(void)
@@ -129,7 +133,6 @@ internal_cache_ct_resync(enum nf_conntrack_msg_type type,
 					return NFCT_CB_CONTINUE;
 				}
 				
-				
 				if (nfct_attr_is_set(ct, ATTR_TIMEOUT)){
 					diff = (float)(nfct_get_attr_u32(ct, ATTR_TIMEOUT) + time_cached()) - (obj->lastupdate + timeout);
 					if(diff > -2 && diff < 2){
@@ -153,11 +156,9 @@ internal_cache_ct_resync(enum nf_conntrack_msg_type type,
 
 	switch (obj->status) {
 	case C_OBJ_NEW:
-					dlog(LOG_ERR, "new");
 		sync_send(obj, NET_T_STATE_CT_NEW);
 		break;
 	case C_OBJ_ALIVE:
-					dlog(LOG_ERR, "u");
 		sync_send(obj, NET_T_STATE_CT_UPD);
 		break;
 	}
