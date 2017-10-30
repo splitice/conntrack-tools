@@ -113,11 +113,12 @@ internal_cache_ct_resync(enum nf_conntrack_msg_type type,
 			 struct nf_conntrack *ct, void *data)
 {
 	struct cache_object *obj;
+	int id;
 
 	if (ct_filter_conntrack(ct, 1))
 		return NFCT_CB_CONTINUE;
 	
-	obj = cache_find(c, ptr, &id);
+	obj = cache_find(STATE(mode)->internal->ct.data, ct, &id);
 	if (obj) {
 		if (obj->status != C_OBJ_DEAD) {
 			if (nfct_attr_is_set(obj->ptr, ATTR_TIMEOUT)){
