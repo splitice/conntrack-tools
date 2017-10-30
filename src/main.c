@@ -52,7 +52,7 @@ static const char usage_client_commands[] =
 		"dump statistics\n"
 	"  -R [ct|expect], resync with kernel conntrack table\n"
 	"  -n, request resync with other node (only FT-FW and NOTRACK modes)\n"
-	"  -B, force a bulk send to other replica firewalls\n
+	"  -B, force a bulk send to other replica firewalls\n"
 	"  -S, force a bulk send of expiring connections to other replica firewalls\n"
 	"  -x, dump cache in XML format (requires -i or -e)\n"
 	"  -t, reset the kernel timeout (see PurgeTimeout clause)\n"
@@ -232,7 +232,7 @@ int main(int argc, char *argv[])
 			set_operation_mode(&type, REQUEST, argv);
 			action = SEND_BULK;
 			break;
-		case 'B':
+		case 'S':
 			set_operation_mode(&type, REQUEST, argv);
 			action = SEND_BULKEXP;
 			break;
