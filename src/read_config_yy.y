@@ -81,7 +81,7 @@ enum {
 %token T_CLOSE_WAIT T_LAST_ACK T_TIME_WAIT T_CLOSE T_LISTEN
 %token T_SYSLOG T_WRITE_THROUGH T_STAT_BUFFER_SIZE T_DESTROY_TIMEOUT
 %token T_RCVBUFF T_SNDBUFF T_NOTRACK T_POLL_SECS
-%token T_FILTER T_ADDRESS T_PROTOCOL T_STATE T_ACCEPT T_IGNORE
+%token T_FILTER T_ADDRESS T_PROTOCOL T_STATE T_ACCEPT T_IGNORE T_L4PORT
 %token T_FROM T_USERSPACE T_KERNELSPACE T_EVENT_ITER_LIMIT T_DEFAULT
 %token T_NETLINK_OVERRUN_RESYNC T_NICE T_IPV4_DEST_ADDR T_IPV6_DEST_ADDR
 %token T_SCHEDULER T_TYPE T_PRIO T_NETLINK_EVENTS_RELIABLE
@@ -1493,6 +1493,28 @@ filter_address_item : T_IPV6_ADDR T_IP
 
 	nfct_filter_add_attr(STATE(filter), NFCT_FILTER_SRC_IPV6, &filter_ipv6);
 	nfct_filter_add_attr(STATE(filter), NFCT_FILTER_DST_IPV6, &filter_ipv6);
+};
+
+filter_item : T_L4PORT T_ACCEPT '{' filter_l4port_list '}'
+{
+	ct_filter_set_logic(STATE(us_filter),
+			    CT_FILTER_L4PORT,
+			    CT_FILTER_POSITIVE);
+};
+
+filter_item : T_L4PORT T_IGNORE '{' filter_l4port_list '}'
+{
+	ct_filter_set_logic(STATE(us_filter),
+			    CT_FILTER_L4PORT,
+			    CT_FILTER_NEGATIVE);
+};
+
+filter_l4port_list :
+		  | filter_l4port_list filter_l4port_item;
+
+filter_l4port_item : T_NUMBER
+{
+	ct_filter_add_port(STATE(us_filter), $1);
 };
 
 filter_item : T_STATE T_ACCEPT '{' filter_state_list '}'

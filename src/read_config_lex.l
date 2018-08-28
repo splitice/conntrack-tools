@@ -121,6 +121,7 @@ notrack		[N|n][O|o][T|t][R|r][A|a][C|c][K|k]
 "Protocol"			{ return T_PROTOCOL; }
 "Address"			{ return T_ADDRESS; }
 "State"				{ return T_STATE; }
+"DstPort"				{ return T_L4PORT; }
 "Accept"			{ return T_ACCEPT; }
 "Ignore"			{ return T_IGNORE; }
 "PurgeTimeout"			{ return T_PURGE; }

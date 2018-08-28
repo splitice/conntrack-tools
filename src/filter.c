@@ -39,11 +39,19 @@ struct ct_filter {
 	struct hashtable *h6;
 	struct vector *v;
 	struct vector *v6;
+	struct hashtable *ports;
 };
 
 /* XXX: These should be configurable, better use a rb-tree */
 #define FILTER_POOL_SIZE 128
 #define FILTER_POOL_LIMIT INT_MAX
+
+static uint32_t ct_filter_hash_port(const void *data, const struct hashtable *table)
+{
+	const uint16_t *f = data;
+
+	return jhash_1word(*f, 0) % table->hashsize;
+}
 
 static uint32_t ct_filter_hash(const void *data, const struct hashtable *table)
 {
@@ -55,6 +63,14 @@ static uint32_t ct_filter_hash(const void *data, const struct hashtable *table)
 static uint32_t ct_filter_hash6(const void *data, const struct hashtable *table)
 {
 	return jhash2(data, 4, 0) % table->hashsize;
+}
+
+static int ct_filter_compare_port(const void *data1, const void *data2)
+{
+	const struct ct_filter_port_hnode *f1 = data1;
+	const uint16_t *f2 = data2;
+
+	return f1->port == *f2;
 }
 
 static int ct_filter_compare(const void *data1, const void *data2)
@@ -100,6 +116,15 @@ struct ct_filter *ct_filter_create(void)
 		return NULL;
 	}
 
+	filter->ports = hashtable_create(FILTER_POOL_SIZE,
+				     FILTER_POOL_LIMIT,
+				     ct_filter_hash_port,
+				     ct_filter_compare_port);
+	if (!filter->h) {
+		free(filter);
+		return NULL;
+	}
+
 	filter->v = vector_create(sizeof(struct ct_filter_netmask_ipv4));
 	if (!filter->v) {
 		free(filter->h6);
@@ -127,6 +152,7 @@ void ct_filter_destroy(struct ct_filter *filter)
 {
 	hashtable_destroy(filter->h);
 	hashtable_destroy(filter->h6);
+	hashtable_destroy(filter->ports);
 	vector_destroy(filter->v);
 	vector_destroy(filter->v6);
 	free(filter);
@@ -152,6 +178,24 @@ void ct_filter_set_logic(struct ct_filter *filter,
 {
 	filter = __filter_alloc(filter);
 	filter->logic[type] = logic;
+}
+
+int ct_filter_add_port(struct ct_filter *filter, uint16_t port)
+{
+	int id;
+	filter = __filter_alloc(filter);
+	port = htons(port);
+	id = hashtable_hash(filter->ports, &port);
+	if (!hashtable_find(filter->ports, &port, id)) {
+		struct ct_filter_port_hnode *n;
+		n = malloc(sizeof(struct ct_filter_port_hnode));
+		if (n == NULL)
+			return 0;
+		n->port = port;
+		hashtable_add(filter->ports, &n->node, id);
+		return 0;
+	}
+	return 1;
 }
 
 int ct_filter_add_ip(struct ct_filter *filter, void *data, uint8_t family)
@@ -316,6 +360,39 @@ __ct_filter_test_state(struct ct_filter *f, const struct nf_conntrack *ct)
 	return test_bit_u16(val, &f->statemap[protonum]);
 }
 
+static inline int
+__ct_filter_test_port(struct ct_filter *f, const struct nf_conntrack *ct)
+{
+	int id_dst;
+	uint16_t dst;
+
+	dst = nfct_get_attr_u16(ct, ATTR_PORT_DST);
+	
+	id_dst = hashtable_hash(f->h, &dst);
+	
+	return hashtable_find(f->ports, &dst, id_dst); 
+}
+
+static int
+ct_filter_check_all(struct ct_filter *f, const struct nf_conntrack *ct)
+{
+	int ret;
+
+	/* no event filtering at all */
+	if (f == NULL)
+		return 1;
+
+	if (f->logic[CT_FILTER_L4PORT] != -1) {
+		if (nfct_attr_is_set(ct, ATTR_PORT_DST)) {
+			ret = __ct_filter_test_port(f, ct);
+			if (ret ^ f->logic[CT_FILTER_L4PORT])
+				return 0;
+		}
+	}
+	
+	return 1;
+}
+
 static int
 ct_filter_check(struct ct_filter *f, const struct nf_conntrack *ct)
 {
@@ -325,6 +402,7 @@ ct_filter_check(struct ct_filter *f, const struct nf_conntrack *ct)
 	if (f == NULL)
 		return 1;
 
+	
 	if (f->logic[CT_FILTER_L4PROTO] != -1) {
 		ret = test_bit_u32(protonum, f->l4protomap);
 		if (ret ^ f->logic[CT_FILTER_L4PROTO])
@@ -397,11 +475,18 @@ static inline int ct_filter_sanity_check(const struct nf_conntrack *ct)
 /* we do user-space filtering for dump and resyncs */
 int ct_filter_conntrack(const struct nf_conntrack *ct, int userspace)
 {
+	struct ct_filter *f;
+
 	/* missing mandatory attributes in object */
 	if (!ct_filter_sanity_check(ct))
 		return 1;
 
-	if (userspace && !ct_filter_check(STATE(us_filter), ct))
+	f = STATE(us_filter);
+
+	if (!ct_filter_check_all(f, ct))
+		return 1;
+
+	if (userspace && !ct_filter_check(f, ct))
 		return 1;
 
 	return 0;

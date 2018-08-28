@@ -10,12 +10,18 @@ enum ct_filter_type {
 	CT_FILTER_L4PROTO,
 	CT_FILTER_STATE,
 	CT_FILTER_ADDRESS,	/* also for netmask */
+	CT_FILTER_L4PORT,
 	CT_FILTER_MAX
 };
 
 enum ct_filter_logic {
 	CT_FILTER_NEGATIVE = 0,
 	CT_FILTER_POSITIVE = 1,
+};
+
+struct ct_filter_port_hnode {
+	struct hashtable_node node;
+	uint16_t port;
 };
 
 struct ct_filter_ipv4_hnode {
@@ -47,6 +53,7 @@ int ct_filter_add_ip(struct ct_filter *filter, void *data, uint8_t family);
 int ct_filter_add_netmask(struct ct_filter *filter, void *data, uint8_t family);
 void ct_filter_add_proto(struct ct_filter *filter, int protonum);
 void ct_filter_add_state(struct ct_filter *f, int protonum, int state);
+int ct_filter_add_port(struct ct_filter *filter, uint16_t port);
 void ct_filter_set_logic(struct ct_filter *f,
 			 enum ct_filter_type type,
 			 enum ct_filter_logic logic);
