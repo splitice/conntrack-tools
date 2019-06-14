@@ -72,11 +72,11 @@ static void local_flush_master(void)
 	}
 }
 
-static void local_resync_master(void)
+static void local_resync_master(const char* due_to)
 {
 	if (STATE(mode)->internal->flags & INTERNAL_F_POPULATE) {
 		STATE(stats).nl_kernel_table_resync++;
-		dlog(LOG_NOTICE, "resync with master conntrack table");
+		dlog(LOG_NOTICE, "resync with master conntrack table due to %s", due_to);
 		nl_dump_conntrack_table(STATE(resync));
 	} else {
 		dlog(LOG_NOTICE, "resync is unsupported in this mode");
@@ -123,7 +123,7 @@ int ctnl_local(int fd, int type, void *data)
 		local_flush_master();
 		break;
 	case CT_RESYNC_MASTER:
-		local_resync_master();
+		local_resync_master("requested for master");
 		break;
 	case EXP_FLUSH_MASTER:
 		local_exp_flush_master();
@@ -136,7 +136,7 @@ int ctnl_local(int fd, int type, void *data)
 		local_exp_flush_master();
 		break;
 	case ALL_RESYNC_MASTER:
-		local_resync_master();
+		local_resync_master("requested for all master");
 		local_exp_resync_master();
 		break;
 	}
